@@ -4,11 +4,33 @@ import PaintField from "../components/PaintField";
 import { paints } from "../data/paints";
 import { hexToHsb, hexToRgb } from "../lib/color";
 import { compareHexColors } from "../lib/similarity";
-import type { PaintRecord } from "../types";
+import {
+  PAINT_COLLECTIONS,
+  PAINT_COLLECTION_LABELS,
+  PAINT_CONFIDENCE_LABELS,
+  type PaintRecord,
+} from "../types";
 
 interface CompareProps {
   selectedPaint: PaintRecord | null;
   onAnalyzePaint: (paint: PaintRecord) => void;
+}
+
+function PaintOptions() {
+  return PAINT_COLLECTIONS.map((collection) => (
+    <optgroup
+      key={collection}
+      label={PAINT_COLLECTION_LABELS[collection]}
+    >
+      {paints
+        .filter((paint) => paint.collection === collection)
+        .map((paint) => (
+          <option key={paint.id} value={paint.id}>
+            {paint.brand} — {paint.name}
+          </option>
+        ))}
+    </optgroup>
+  ));
 }
 
 function PaintComparisonPanel({ paint }: { paint: PaintRecord }) {
@@ -23,7 +45,11 @@ function PaintComparisonPanel({ paint }: { paint: PaintRecord }) {
         label={`${paint.brand} ${paint.name} color field`}
       >
         <div className="compare-panel__field-identity">
-          <span>{paint.brand}</span>
+          <span>
+            {paint.collection === "other"
+              ? "Other collection"
+              : `${PAINT_COLLECTION_LABELS[paint.collection]} · ${paint.brand}`}
+          </span>
           <h2>{paint.name}</h2>
         </div>
         <div className="compare-panel__field-value">
@@ -33,6 +59,10 @@ function PaintComparisonPanel({ paint }: { paint: PaintRecord }) {
       </PaintField>
       {rgb && hsb ? (
         <dl className="compare-specs">
+          <div>
+            <dt>Provenance</dt>
+            <dd>{PAINT_CONFIDENCE_LABELS[paint.confidence]}</dd>
+          </div>
           <div>
             <dt>RGB</dt>
             <dd>{rgb.r} · {rgb.g} · {rgb.b}</dd>
@@ -89,11 +119,7 @@ export default function Compare({ selectedPaint, onAnalyzePaint }: CompareProps)
             value={leftId}
             onChange={(event) => setLeftId(Number(event.target.value))}
           >
-            {paints.map((paint) => (
-              <option key={paint.id} value={paint.id}>
-                {paint.brand} — {paint.name}
-              </option>
-            ))}
+            <PaintOptions />
           </select>
         </label>
         <div className="compare-selector-center">
@@ -124,11 +150,7 @@ export default function Compare({ selectedPaint, onAnalyzePaint }: CompareProps)
             value={rightId}
             onChange={(event) => setRightId(Number(event.target.value))}
           >
-            {paints.map((paint) => (
-              <option key={paint.id} value={paint.id}>
-                {paint.brand} — {paint.name}
-              </option>
-            ))}
+            <PaintOptions />
           </select>
         </label>
       </section>

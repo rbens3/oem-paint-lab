@@ -5,6 +5,15 @@
     "theme": "Cobalt",
     "enrichment": "none",
     "scope": "app",
+    "brief": "OEM Paint Lab data credibility and paint detail depth",
+    "variation": "record-led detail and progressive filter disclosure"
+  },
+  {
+    "date": "2026-08-18",
+    "macrostructure": "Workbench",
+    "theme": "Cobalt",
+    "enrichment": "none",
+    "scope": "app",
     "brief": "OEM Paint Lab automotive precision instrument refinement"
   },
   {

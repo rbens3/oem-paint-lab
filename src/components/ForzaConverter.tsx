@@ -27,9 +27,13 @@ interface FlakePanelProps {
 }
 
 interface ColorCardProps {
-  color: PaintRecord;
-  onHexChange: (id: number, hex: PaintRecord["hex"]) => void;
+  color: EditablePaintRecord;
+  onHexChange: (id: number, hex: EditablePaintRecord["hex"]) => void;
 }
+
+type EditablePaintRecord = Omit<PaintRecord, "hex"> & {
+  hex: PaintRecord["hex"] | "";
+};
 
 interface BrandStyle {
   accent: string;
@@ -49,8 +53,9 @@ const CONFIDENCE_STYLES: Record<
   PaintConfidence,
   { color: string; label: string; bg: string }
 > = {
-  confirmed: { color: "#22c55e", label: "✓ CONFIRMED", bg: "#22c55e18" },
-  approximate: { color: "#f59e0b", label: "~ APPROXIMATE", bg: "#f59e0b18" },
+  verified: { color: "#22c55e", label: "✓ VERIFIED", bg: "#22c55e18" },
+  reference: { color: "#60a5fa", label: "REFERENCE", bg: "#60a5fa18" },
+  estimated: { color: "#f59e0b", label: "~ ESTIMATED", bg: "#f59e0b18" },
 };
 
 function CopyBtn({ text }: CopyButtonProps) {
@@ -122,7 +127,7 @@ function ColorCard({ color, onHexChange }: ColorCardProps) {
   const forza = rgb ? rgbToForzaHSB(rgb.r, rgb.g, rgb.b) : null;
   const filled = !!color.hex && !!forza;
   const brand = BRAND_STYLES[color.brand];
-  const conf = CONFIDENCE_STYLES[color.confidence] || CONFIDENCE_STYLES.approximate;
+  const conf = CONFIDENCE_STYLES[color.confidence] || CONFIDENCE_STYLES.estimated;
 
   return (
     <div style={{ background:"#161616", borderRadius:10, overflow:"hidden", border:"1px solid #ffffff15", display:"flex", flexDirection:"column" }}>
@@ -141,7 +146,7 @@ function ColorCard({ color, onHexChange }: ColorCardProps) {
               <input autoFocus type="text" defaultValue={color.hex.replace("#","")}
                 onBlur={(event) => {
                   const value = event.target.value.replace(/[^0-9a-fA-F]/g, "").slice(0, 6);
-                  const hex: PaintRecord["hex"] = value ? `#${value}` : "";
+                  const hex: EditablePaintRecord["hex"] = value ? `#${value}` : "";
                   onHexChange(color.id, hex);
                   setEditing(false);
                 }}
@@ -155,7 +160,7 @@ function ColorCard({ color, onHexChange }: ColorCardProps) {
             )}
             {color.hex && <CopyBtn text={color.hex} />}
           </div>
-          {color.confidence !== "confirmed" && (
+          {color.confidence !== "verified" && (
             <div style={{ fontSize:10, color:"#444", marginTop:3, fontStyle:"italic" }}>{color.note}</div>
           )}
         </div>
@@ -179,7 +184,7 @@ function ColorCard({ color, onHexChange }: ColorCardProps) {
 }
 
 export default function ForzaConverter() {
-  const [colors, setColors] = useState<PaintRecord[]>(paints);
+  const [colors, setColors] = useState<EditablePaintRecord[]>(paints);
   const [activeBrand, setActiveBrand] = useState<PaintBrand | "All">("All");
   const [search, setSearch] = useState("");
   const [customHex, setCustomHex] = useState("");
@@ -187,7 +192,7 @@ export default function ForzaConverter() {
   const [showCustomFlake, setShowCustomFlake] = useState(false);
   const [customFlakeType, setCustomFlakeType] = useState<FlakeType>("silver");
 
-  const handleHexChange = useCallback((id: number, hex: PaintRecord["hex"]) => {
+  const handleHexChange = useCallback((id: number, hex: EditablePaintRecord["hex"]) => {
     setColors(prev => prev.map(c => c.id === id ? { ...c, hex } : c));
   }, []);
 
@@ -205,8 +210,9 @@ export default function ForzaConverter() {
     return matchBrand && matchSearch;
   });
 
-  const confirmed = colors.filter(c=>c.confidence==="confirmed").length;
-  const approximate = colors.filter(c=>c.confidence==="approximate").length;
+  const verified = colors.filter(c=>c.confidence==="verified").length;
+  const reference = colors.filter(c=>c.confidence==="reference").length;
+  const estimated = colors.filter(c=>c.confidence==="estimated").length;
 
   return (
     <div style={{ minHeight:"100vh", background:"#0a0a0a", fontFamily:"'Georgia',serif", color:"#e0e0e0" }}>
@@ -215,8 +221,9 @@ export default function ForzaConverter() {
         <h1 style={{ margin:"0 0 8px", fontSize:24, fontWeight:700, color:"#f8f8f8", letterSpacing:"-0.02em" }}>Paint Color Converter</h1>
 
         <div style={{ display:"flex", gap:12, flexWrap:"wrap", marginBottom:14 }}>
-          <div style={{ background:"#22c55e18", border:"1px solid #22c55e33", borderRadius:6, padding:"4px 12px", fontSize:11, color:"#22c55e", fontFamily:"monospace" }}>✓ {confirmed} CONFIRMED</div>
-          <div style={{ background:"#f59e0b18", border:"1px solid #f59e0b33", borderRadius:6, padding:"4px 12px", fontSize:11, color:"#f59e0b", fontFamily:"monospace" }}>~ {approximate} APPROXIMATE</div>
+          <div style={{ background:"#22c55e18", border:"1px solid #22c55e33", borderRadius:6, padding:"4px 12px", fontSize:11, color:"#22c55e", fontFamily:"monospace" }}>✓ {verified} VERIFIED</div>
+          <div style={{ background:"#60a5fa18", border:"1px solid #60a5fa33", borderRadius:6, padding:"4px 12px", fontSize:11, color:"#60a5fa", fontFamily:"monospace" }}>{reference} REFERENCE</div>
+          <div style={{ background:"#f59e0b18", border:"1px solid #f59e0b33", borderRadius:6, padding:"4px 12px", fontSize:11, color:"#f59e0b", fontFamily:"monospace" }}>~ {estimated} ESTIMATED</div>
           <div style={{ fontSize:11, color:"#444", fontFamily:"monospace", alignSelf:"center" }}>H=hue°÷360 · S=sat%÷100 · B=val%÷100 · ▼ FLAKE for metallic layers</div>
         </div>
 

@@ -1,13 +1,23 @@
 import { paints } from "../data/paints";
+import {
+  PAINT_COLLECTIONS,
+  PAINT_COLLECTION_LABELS,
+  PAINT_CONFIDENCES,
+  PAINT_CONFIDENCE_LABELS,
+} from "../types";
 
 const METHODS = [
   {
     title: "Digital input",
-    body: "HEX is parsed as six-digit sRGB notation, then expressed as red, green, and blue values from 0–255.",
+    body: "HEX is parsed as six-digit sRGB notation, then expressed as red, green, and blue values from 0–255. The stored value describes a screen color, not a spectral measurement of physical paint.",
   },
   {
     title: "Useful color values",
     body: "RGB is converted to HSB / HSV for conventional degree and percentage readouts, plus normalized 0–1 values for Forza workflows.",
+  },
+  {
+    title: "Evidence before certainty",
+    body: "Every record is assigned a conservative confidence level from its existing source note. Missing evidence is kept visible; it is never promoted to manufacturer verification by inference.",
   },
   {
     title: "Perceptual matching",
@@ -15,9 +25,22 @@ const METHODS = [
   },
   {
     title: "Finish modeling",
-    body: "Flake suggestions are deterministic HSB offsets. They are starting recipes, not physical spectral simulations of pigment, binder, and substrate.",
+    body: "Flake suggestions are deterministic HSB offsets. They are starting recipes, not physical spectral simulations of pigment, binder, substrate, or lighting.",
+  },
+  {
+    title: "Archive scope",
+    body: "Factory paint references, motorsport liveries, and other digital colors remain separate collections. This keeps a useful archive broad without implying that every record is an OEM production paint.",
   },
 ];
+
+const confidenceDefinitions = {
+  verified:
+    "Supported by a manufacturer or equivalent first-party specification. None of the current records meet this threshold yet.",
+  reference:
+    "A traceable digital value from a secondary database, supplied reference, or in-game source.",
+  estimated:
+    "A value derived or updated from imagery, paint chips, livery photography, or an explicitly approximate source.",
+} as const;
 
 export default function Methodology() {
   return (
@@ -60,6 +83,26 @@ export default function Methodology() {
         ))}
       </section>
 
+      <section className="method-confidence" aria-labelledby="confidence-title">
+        <div className="paint-detail-section-heading">
+          <h2 id="confidence-title">Provenance model</h2>
+          <p>Confidence describes source quality, not perceptual match quality.</p>
+        </div>
+        <dl className="method-confidence__list">
+          {PAINT_CONFIDENCES.map((confidence) => (
+            <div key={confidence}>
+              <dt>
+                <span>{PAINT_CONFIDENCE_LABELS[confidence]}</span>
+                <strong>
+                  {paints.filter((paint) => paint.confidence === confidence).length}
+                </strong>
+              </dt>
+              <dd>{confidenceDefinitions[confidence]}</dd>
+            </div>
+          ))}
+        </dl>
+      </section>
+
       <section className="method-notes">
         <div>
           <h2>Interpretation limits</h2>
@@ -89,13 +132,33 @@ export default function Methodology() {
         </dl>
       </section>
 
+      <section className="method-collections" aria-labelledby="collection-title">
+        <div>
+          <h2 id="collection-title">Collection boundaries</h2>
+          <p>
+            Classification changes how records are presented, not their original
+            names, identifiers, or HEX values.
+          </p>
+        </div>
+        <dl>
+          {PAINT_COLLECTIONS.map((collection) => (
+            <div key={collection}>
+              <dt>{PAINT_COLLECTION_LABELS[collection]}</dt>
+              <dd>
+                {paints.filter((paint) => paint.collection === collection).length}
+              </dd>
+            </div>
+          ))}
+        </dl>
+      </section>
+
       <section className="method-caveat">
-        <h2>Data confidence</h2>
+        <h2>What remains intentionally unknown</h2>
         <p>
-          Confidence labels and source notes are preserved from the current dataset.
-          They should not be interpreted as manufacturer certification. A later data
-          phase can normalize paint codes, finish types, source records, and evidence
-          quality without changing the calculation layer.
+          Paint code and finish metadata are shown only where the current record can
+          support them. Unknown fields remain explicit rather than being filled with
+          plausible but unverified claims. Original source notes remain available on
+          every paint record.
         </p>
       </section>
     </div>

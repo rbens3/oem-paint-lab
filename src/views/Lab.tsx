@@ -10,13 +10,20 @@ import {
 } from "../lib/color";
 import { FLAKE_TYPES, generateFlake } from "../lib/finishes";
 import { findSimilarPaints } from "../lib/similarity";
-import type { FlakeType, HexColor, PaintRecord } from "../types";
+import {
+  PAINT_COLLECTION_LABELS,
+  PAINT_CONFIDENCE_LABELS,
+  type FlakeType,
+  type HexColor,
+  type PaintRecord,
+} from "../types";
 
 interface LabProps {
   selectedHex: HexColor;
   selectedPaint: PaintRecord | null;
   onHexChange: (hex: HexColor) => void;
-  onSelectPaint: (paint: PaintRecord) => void;
+  onAnalyzePaint: (paint: PaintRecord) => void;
+  onInspectPaint: (paint: PaintRecord) => void;
 }
 
 interface ValueRowProps {
@@ -37,7 +44,8 @@ export default function Lab({
   selectedHex,
   selectedPaint,
   onHexChange,
-  onSelectPaint,
+  onAnalyzePaint,
+  onInspectPaint,
 }: LabProps) {
   const [hexDraft, setHexDraft] = useState(selectedHex.slice(1));
   const [hexTouched, setHexTouched] = useState(false);
@@ -84,7 +92,7 @@ export default function Lab({
           <h1 id="lab-title">OEM Paint Lab</h1>
           <p>
             Analyze a digital color, translate it into useful values, and locate the
-            closest references in a 173-paint OEM library.
+            closest references in a 173-record paint library.
           </p>
         </div>
       </section>
@@ -102,7 +110,9 @@ export default function Lab({
                 <strong>{selectedPaint?.name ?? "Custom color"}</strong>
               </div>
               <span className="lab-color-preview__confidence">
-                {selectedPaint?.confidence ?? "custom"}
+                {selectedPaint
+                  ? PAINT_CONFIDENCE_LABELS[selectedPaint.confidence]
+                  : "Custom sample"}
               </span>
             </div>
             <div className="lab-color-preview__value">
@@ -209,7 +219,7 @@ export default function Lab({
       <section className="matches-section" aria-labelledby="matches-title">
         <div className="section-heading">
           <div>
-            <h2 id="matches-title">Nearest OEM matches</h2>
+            <h2 id="matches-title">Nearest paint matches</h2>
             <p>
               Ranked with CIEDE2000 perceptual distance. Lower Delta E values are
               closer.
@@ -224,8 +234,8 @@ export default function Lab({
               <button
                 type="button"
                 className="match-row__select"
-                onClick={() => onSelectPaint(paint)}
-                aria-label={`Analyze ${paint.brand} ${paint.name}`}
+                onClick={() => onInspectPaint(paint)}
+                aria-label={`View details for ${paint.brand} ${paint.name}`}
               >
                 <PaintField
                   hex={paint.hex}
@@ -235,7 +245,11 @@ export default function Lab({
                 <span className="match-row__rank">{String(index + 1).padStart(2, "0")}</span>
                 <span className="match-row__identity">
                   <strong>{paint.name}</strong>
-                  <span>{paint.brand}</span>
+                  <span>
+                    {paint.collection === "other"
+                      ? "Other collection"
+                      : `${paint.brand} · ${PAINT_COLLECTION_LABELS[paint.collection]}`}
+                  </span>
                 </span>
                 <span className="match-row__hex">{paint.hex}</span>
                 <span className="match-row__distance">
@@ -243,7 +257,16 @@ export default function Lab({
                   <strong>{deltaE.toFixed(2)}</strong>
                 </span>
               </button>
-              <CopyButton value={paint.hex} label="Copy HEX" />
+              <div className="match-row__actions">
+                <button
+                  type="button"
+                  className="button button--secondary match-row__lab-action"
+                  onClick={() => onAnalyzePaint(paint)}
+                >
+                  Open in Lab
+                </button>
+                <CopyButton value={paint.hex} label="Copy HEX" />
+              </div>
             </article>
           ))}
         </div>

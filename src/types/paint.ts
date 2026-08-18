@@ -10,53 +10,104 @@ export const PAINT_BRANDS = [
 ] as const;
 
 export type PaintBrand = (typeof PAINT_BRANDS)[number];
-export type PaintConfidence = "confirmed" | "approximate";
 
-export type PaintFinish =
-  | "solid"
-  | "metallic"
-  | "pearl"
-  | "matte"
-  | "satin"
-  | "special";
+export const PAINT_CONFIDENCES = ["verified", "reference", "estimated"] as const;
+export type PaintConfidence = (typeof PAINT_CONFIDENCES)[number];
 
-export type PaintColorFamily =
-  | "black"
-  | "white"
-  | "grey"
-  | "silver"
-  | "blue"
-  | "green"
-  | "yellow"
-  | "orange"
-  | "red"
-  | "pink"
-  | "purple"
-  | "brown"
-  | "beige"
-  | "gold"
-  | "bronze";
+export const PAINT_COLLECTIONS = ["oem", "motorsport", "other"] as const;
+export type PaintCollection = (typeof PAINT_COLLECTIONS)[number];
+
+export const PAINT_FINISHES = [
+  "solid",
+  "metallic",
+  "pearl",
+  "multi-layer",
+  "unknown",
+] as const;
+export type PaintFinish = (typeof PAINT_FINISHES)[number];
+
+export const PAINT_COLOR_FAMILIES = [
+  "red",
+  "orange",
+  "yellow",
+  "green",
+  "blue",
+  "purple",
+  "pink",
+  "brown",
+  "grey",
+  "black",
+  "white",
+  "other",
+] as const;
+export type PaintColorFamily = (typeof PAINT_COLOR_FAMILIES)[number];
 
 export type PaintSourceType =
   | "manufacturer"
-  | "paint-database"
+  | "reference-database"
   | "in-game"
   | "visual-reference"
-  | "community"
-  | "other";
+  | "published-standard"
+  | "provided"
+  | "unspecified";
+
+export const PAINT_COLLECTION_LABELS: Record<PaintCollection, string> = {
+  oem: "OEM Paints",
+  motorsport: "Motorsport",
+  other: "Other",
+};
+
+export const PAINT_CONFIDENCE_LABELS: Record<PaintConfidence, string> = {
+  verified: "Verified",
+  reference: "Reference",
+  estimated: "Estimated",
+};
+
+export const PAINT_FINISH_LABELS: Record<PaintFinish, string> = {
+  solid: "Solid",
+  metallic: "Metallic",
+  pearl: "Pearl",
+  "multi-layer": "Multi-layer",
+  unknown: "Unknown",
+};
+
+export const PAINT_COLOR_FAMILY_LABELS: Record<PaintColorFamily, string> = {
+  red: "Red",
+  orange: "Orange",
+  yellow: "Yellow",
+  green: "Green",
+  blue: "Blue",
+  purple: "Purple",
+  pink: "Pink",
+  brown: "Brown",
+  grey: "Grey",
+  black: "Black",
+  white: "White",
+  other: "Other",
+};
+
+export const PAINT_SOURCE_TYPE_LABELS: Record<PaintSourceType, string> = {
+  manufacturer: "Manufacturer source",
+  "reference-database": "Reference database",
+  "in-game": "In-game reference",
+  "visual-reference": "Visual reference",
+  "published-standard": "Published standard",
+  provided: "Provided digital value",
+  unspecified: "Unspecified source",
+};
 
 export interface PaintRecord {
   id: number;
   brand: PaintBrand;
   name: string;
-  /** Empty string is allowed while a user clears an editable HEX field. */
-  hex: HexColor | "";
+  hex: HexColor;
   confidence: PaintConfidence;
   note: string;
+  collection: PaintCollection;
+  finish: PaintFinish;
+  colorFamily: PaintColorFamily;
+  source: string;
+  sourceType: PaintSourceType;
+  tags: string[];
   paintCode?: string;
-  finish?: PaintFinish;
-  colorFamily?: PaintColorFamily;
-  source?: string;
-  sourceType?: PaintSourceType;
-  tags?: string[];
 }

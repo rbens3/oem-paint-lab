@@ -1,6 +1,9 @@
-import type { PaintRecord } from "../types";
+import {
+  normalizePaintRecord,
+  type LegacyPaintRecord,
+} from "./paintMetadata";
 
-export const paints = [
+const legacyPaints = [
   // ── PORSCHE ──────────────────────────────────────────────────────────────
   // Nashy Blue: PTS 5NY, Sean Wotherspoon, medium blue — no public hex, approximated
   { id: 1,  brand:"Porsche",     name:"Nashy Blue",               hex:"#4B75A6", confidence:"confirmed", note:"PTS 5NY. Medium blue by Sean Wotherspoon — approximated from photos." },
@@ -225,7 +228,8 @@ export const paints = [
   { id:171, brand:"McLaren", name:"Vegas Blue", hex:"#0149D3", confidence:"confirmed", note:"Confirmed via exoticcarcolors.com." },
   { id:172, brand:"McLaren", name:"Volcano Orange", hex:"#C82504", confidence:"confirmed", note:"Confirmed via exoticcarcolors.com." },
   { id:173, brand:"McLaren", name:"Volcano Red", hex:"#A80115", confidence:"confirmed", note:"Confirmed via exoticcarcolors.com." },
-] satisfies PaintRecord[];
+] satisfies LegacyPaintRecord[];
+
+export const paints = legacyPaints.map(normalizePaintRecord);
 
 export const PAINT_COUNT = paints.length;
-

@@ -2,24 +2,35 @@ import { useEffect, useState } from "react";
 import AppShell from "./components/AppShell";
 import { paints } from "./data/paints";
 import { normalizeHex } from "./lib/color";
-import type { AppView, HexColor, PaintRecord } from "./types";
+import type { AppRoute, AppView, HexColor, PaintRecord } from "./types";
 import Compare from "./views/Compare";
 import Lab from "./views/Lab";
 import Library from "./views/Library";
 import Methodology from "./views/Methodology";
+import PaintDetail from "./views/PaintDetail";
 
 const DEFAULT_PAINT = paints.find((paint) => paint.id === 2) ?? paints[0];
 
-const isAppView = (value: string): value is AppView =>
+const isPrimaryView = (value: string): value is Exclude<AppView, "paint"> =>
   ["lab", "library", "compare", "methodology"].includes(value);
 
-const getViewFromHash = (): AppView => {
+const getRouteFromHash = (): AppRoute => {
   const value = window.location.hash.replace(/^#\/?/, "").toLowerCase();
-  return isAppView(value) ? value : "lab";
+  const [view, id] = value.split("/");
+
+  if (view === "paint" && id) {
+    const paintId = Number(id);
+    if (Number.isInteger(paintId) && paints.some((paint) => paint.id === paintId)) {
+      return { view: "paint", paintId };
+    }
+    return { view: "library" };
+  }
+
+  return { view: isPrimaryView(view) ? view : "lab" };
 };
 
 export default function App() {
-  const [activeView, setActiveView] = useState<AppView>(getViewFromHash);
+  const [route, setRoute] = useState<AppRoute>(getRouteFromHash);
   const [selection, setSelection] = useState<{
     hex: HexColor;
     paint: PaintRecord | null;
@@ -33,19 +44,37 @@ export default function App() {
       window.history.replaceState(null, "", "#/lab");
     }
 
-    const handleHashChange = () => setActiveView(getViewFromHash());
+    const handleHashChange = () => setRoute(getRouteFromHash());
     window.addEventListener("hashchange", handleHashChange);
     return () => window.removeEventListener("hashchange", handleHashChange);
   }, []);
 
   useEffect(() => {
-    const label = activeView.charAt(0).toUpperCase() + activeView.slice(1);
+    const detailPaint =
+      route.view === "paint"
+        ? paints.find((paint) => paint.id === route.paintId)
+        : null;
+    const label = detailPaint
+      ? detailPaint.name
+      : route.view.charAt(0).toUpperCase() + route.view.slice(1);
     document.title = `${label} — OEM Paint Lab`;
-  }, [activeView]);
+  }, [route]);
+
+  useEffect(() => {
+    if (route.view !== "paint") {
+      return;
+    }
+
+    const paint = paints.find((item) => item.id === route.paintId);
+    if (paint) {
+      setSelection({ hex: paint.hex, paint });
+    }
+  }, [route]);
 
   const navigate = (view: AppView) => {
-    setActiveView(view);
-    const nextHash = `#/${view}`;
+    const nextView = view === "paint" ? "library" : view;
+    setRoute({ view: nextView });
+    const nextHash = `#/${nextView}`;
     if (window.location.hash !== nextHash) {
       window.location.hash = nextHash;
     }
@@ -76,16 +105,51 @@ export default function App() {
     navigate("lab");
   };
 
+  const inspectPaint = (paint: PaintRecord) => {
+    selectPaint(paint);
+    setRoute({ view: "paint", paintId: paint.id });
+    const nextHash = `#/paint/${paint.id}`;
+    if (window.location.hash !== nextHash) {
+      window.location.hash = nextHash;
+    }
+    window.scrollTo({ top: 0, behavior: "auto" });
+  };
+
+  const comparePaint = (paint: PaintRecord) => {
+    selectPaint(paint);
+    navigate("compare");
+  };
+
   const view = (() => {
-    switch (activeView) {
+    switch (route.view) {
       case "library":
-        return <Library onAnalyzePaint={analyzePaint} />;
+        return (
+          <Library
+            onAnalyzePaint={analyzePaint}
+            onInspectPaint={inspectPaint}
+          />
+        );
       case "compare":
         return (
-          <Compare selectedPaint={selection.paint} onAnalyzePaint={analyzePaint} />
+          <Compare
+            selectedPaint={selection.paint}
+            onAnalyzePaint={analyzePaint}
+          />
         );
       case "methodology":
         return <Methodology />;
+      case "paint": {
+        const paint = paints.find((item) => item.id === route.paintId) ?? paints[0];
+        return (
+          <PaintDetail
+            paint={paint}
+            onBackToLibrary={() => navigate("library")}
+            onOpenInLab={analyzePaint}
+            onComparePaint={comparePaint}
+            onInspectPaint={inspectPaint}
+          />
+        );
+      }
       case "lab":
       default:
         return (
@@ -93,7 +157,8 @@ export default function App() {
             selectedHex={selection.hex}
             selectedPaint={selection.paint}
             onHexChange={selectHex}
-            onSelectPaint={selectPaint}
+            onAnalyzePaint={analyzePaint}
+            onInspectPaint={inspectPaint}
           />
         );
     }
@@ -101,7 +166,7 @@ export default function App() {
 
   return (
     <AppShell
-      activeView={activeView}
+      activeView={route.view}
       selectedHex={selection.hex}
       onNavigate={navigate}
       onSelectPaint={selectPaint}

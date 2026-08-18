@@ -61,6 +61,8 @@ dense; larger breakpoints restore broader workbench spacing.
 
 - Lab: one large selected-paint field and one graphite Finish Lab band.
 - Library: paint surfaces dominate; metadata and actions stay subordinate.
+- Paint detail: one record-led workbench with a dominant paint field, compact
+  instrument readouts, explicit provenance, and related-record rows.
 - Compare: two equal paint fields dominate; Delta E is the primary numerical figure.
 - Methodology: calculation flow and sequential method rows; no corporate feature cards.
 - No imagery enrichment. Function and color are the visual content.
@@ -77,6 +79,7 @@ dense; larger breakpoints restore broader workbench spacing.
 - Paint-field scale and aspect ratio.
 - Whether the supporting section is light, paper-tinted, or graphite.
 - Density of technical readouts appropriate to the task.
+- Progressive filter disclosure and record-level provenance depth.
 
 ## Exports
 
