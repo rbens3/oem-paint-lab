@@ -1,0 +1,9 @@
+{
+  "date": "2026-08-18",
+  "framework": "React 19 + Vite 8 + TypeScript 7",
+  "font_stack": "No established web-font system",
+  "palette": "Ad-hoc dark inline HEX values",
+  "motion": "motion-cut; no animation library",
+  "spacing": "No established token scale",
+  "preserve": ["React/Vite foundation", "paint dataset", "color utilities", "finish utilities", "similarity utilities"]
+}

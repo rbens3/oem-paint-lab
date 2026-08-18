@@ -26,6 +26,24 @@ export function hexToRgb(hex: string): RgbColor | null {
   };
 }
 
+export function relativeLuminance(rgb: RgbColor): number {
+  const linearize = (channel: number) => {
+    const value = clamp(channel, 0, 255) / 255;
+    return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+  };
+
+  return (
+    linearize(rgb.r) * 0.2126 +
+    linearize(rgb.g) * 0.7152 +
+    linearize(rgb.b) * 0.0722
+  );
+}
+
+export function isLightHex(hex: string): boolean {
+  const rgb = hexToRgb(hex);
+  return rgb ? relativeLuminance(rgb) > 0.18 : false;
+}
+
 /** Backwards-compatible name used by the original converter. */
 export const hexToRGB = hexToRgb;
 

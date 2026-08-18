@@ -1,0 +1,86 @@
+/* Hallmark · macrostructure: Workbench · genre: modern-minimal · design-system: design.md · designed-as-app · theme: Cobalt · tone: automotive-precision · anchor hue: selected paint · enrichment: none · nav: N1b · footer: Ft2 · knobs: readout-bank / paint-archive / compact-mobile */
+/* Hallmark · pre-emit critique: P5 H5 E5 S5 R5 V4 · contrast: pass · slop: pass · honest: pass · chrome: pass · tokens: pass · responsive: pass · icons: pass · mobile: pass */
+:root {
+  --color-paper: oklch(97.5% 0.006 250);
+  --color-paper-2: oklch(94.5% 0.009 250);
+  --color-paper-3: oklch(91% 0.012 250);
+  --color-surface: oklch(99% 0.004 250);
+  --color-ink: oklch(17% 0.014 258);
+  --color-ink-2: oklch(29% 0.016 258);
+  --color-neutral: oklch(44% 0.014 258);
+  --color-muted: oklch(38% 0.013 258);
+  --color-rule: oklch(84% 0.012 250);
+  --color-rule-strong: oklch(68% 0.018 250);
+  --color-graphite: oklch(16% 0.014 258);
+  --color-graphite-2: oklch(21% 0.017 258);
+  --color-graphite-ink: oklch(95% 0.008 250);
+  --color-graphite-muted: oklch(76% 0.012 250);
+  --color-signal: oklch(55% 0.2 256);
+  --color-signal-ink: oklch(98% 0.005 250);
+  --color-accent: var(--color-signal);
+  --color-accent-ink: var(--color-signal-ink);
+  --color-focus: oklch(54% 0.2 256);
+  --color-error: oklch(46% 0.17 26);
+  --color-error-soft: oklch(94% 0.025 26);
+  --color-success: oklch(42% 0.12 151);
+  --color-success-soft: oklch(94% 0.025 151);
+  --color-backdrop: oklch(12% 0.012 258 / 0.72);
+  --color-transparent: transparent;
+  --color-paint: oklch(62% 0.1 255);
+  --color-paint-ink: var(--color-graphite-ink);
+  --color-paint-wash: color-mix(in oklch, var(--color-paint) 13%, var(--color-paper));
+  --color-paint-rule: color-mix(in oklch, var(--color-paint) 42%, var(--color-rule));
+  --color-selection: color-mix(in oklch, var(--color-paint) 24%, var(--color-paper));
+
+  --font-display: "Space Grotesk", "Arial Narrow", sans-serif;
+  --font-body: "IBM Plex Sans", "Trebuchet MS", sans-serif;
+  --font-mono: "IBM Plex Mono", "Lucida Console", monospace;
+
+  --text-xs: 0.6875rem;
+  --text-sm: 0.8125rem;
+  --text-base: 1rem;
+  --text-lg: 1.375rem;
+  --text-display: clamp(2.5rem, 6vw + 0.5rem, 4.75rem);
+
+  --space-3xs: 0.125rem;
+  --space-2xs: 0.25rem;
+  --space-xs: 0.5rem;
+  --space-sm: 0.75rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2.5rem;
+  --space-2xl: 4rem;
+  --space-3xl: 6rem;
+  --space-4xl: 9rem;
+
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --radius-round: 999px;
+  --rule-thin: 1px;
+  --rule-strong: 2px;
+
+  --dur-micro: 120ms;
+  --dur-short: 220ms;
+  --dur-long: 420ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  --shadow-whisper: 0 1px 2px oklch(20% 0.01 258 / 0.06);
+  --shadow-dialog: 0 24px 80px oklch(12% 0.012 258 / 0.24);
+
+  --page-max: 96rem;
+  --page-gutter: clamp(1rem, 4vw, 3rem);
+  --header-height: 3.75rem;
+  --control-height: 2.75rem;
+
+  --z-base: 1;
+  --z-raised: 10;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-modal: 400;
+  --z-toast: 500;
+  --z-tooltip: 600;
+}
