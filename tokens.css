@@ -32,8 +32,8 @@
   --color-paint-rule: color-mix(in oklch, var(--color-paint) 42%, var(--color-rule));
   --color-selection: color-mix(in oklch, var(--color-paint) 24%, var(--color-paper));
 
-  --font-display: "Space Grotesk", "Arial Narrow", sans-serif;
-  --font-body: "IBM Plex Sans", "Trebuchet MS", sans-serif;
+  --font-display: "Unbounded", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Lexend", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", "Lucida Console", monospace;
 
   --text-xs: 0.6875rem;

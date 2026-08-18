@@ -27,8 +27,8 @@ Modern-minimal with an automotive precision-instrument register.
 
 ## Typography
 
-- Display: Space Grotesk 700, roman — major page headings and exceptional figures only.
-- Body/interface: IBM Plex Sans 400/600 — navigation, prose, headings, buttons, paint names.
+- Display: Unbounded 800/900, roman — major page headings and prominent paint names only.
+- Body/interface: Lexend 400/500/600 — navigation, prose, secondary headings, buttons, and supporting paint information.
 - Technical: IBM Plex Mono 400/500/600 — HEX/RGB/HSB values, codes, compact labels, statuses.
 - Display tracking: `-0.045em`; technical labels: `0.04em–0.08em`.
 - Five-size scale from `--text-xs` through `--text-display`; hierarchy also uses weight and spacing.
@@ -103,8 +103,8 @@ translations mirror its core roles.
   --color-accent-ink: oklch(98% 0.005 250);
   --color-focus: oklch(54% 0.2 256);
 
-  --font-display: "Space Grotesk", sans-serif;
-  --font-body: "IBM Plex Sans", sans-serif;
+  --font-display: "Unbounded", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Lexend", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", monospace;
 
   --space-3xs: 0.125rem;
@@ -139,8 +139,8 @@ translations mirror its core roles.
   --color-rule: oklch(84% 0.012 250);
   --color-accent: oklch(55% 0.2 256);
   --color-focus: oklch(54% 0.2 256);
-  --font-display: "Space Grotesk", sans-serif;
-  --font-body: "IBM Plex Sans", sans-serif;
+  --font-display: "Unbounded", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Lexend", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", monospace;
   --spacing-xs: 0.5rem;
   --spacing-sm: 0.75rem;
@@ -163,8 +163,8 @@ translations mirror its core roles.
     "focus": { "$value": "oklch(54% 0.2 256)", "$type": "color" }
   },
   "font": {
-    "display": { "$value": "Space Grotesk, sans-serif", "$type": "fontFamily" },
-    "body": { "$value": "IBM Plex Sans, sans-serif", "$type": "fontFamily" },
+    "display": { "$value": "Unbounded, ui-sans-serif, system-ui, sans-serif", "$type": "fontFamily" },
+    "body": { "$value": "Lexend, ui-sans-serif, system-ui, sans-serif", "$type": "fontFamily" },
     "mono": { "$value": "IBM Plex Mono, monospace", "$type": "fontFamily" }
   },
   "space": {
