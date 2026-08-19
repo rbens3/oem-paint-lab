@@ -13,7 +13,7 @@ const METHODS = [
   },
   {
     title: "Useful color values",
-    body: "RGB is converted to HSB / HSV for conventional degree and percentage readouts, plus normalized 0–1 values for Forza workflows.",
+    body: "RGB is converted to HSB / HSV for conventional degree and percentage readouts, plus normalized 0–1 values for portable digital workflows.",
   },
   {
     title: "Evidence before certainty",

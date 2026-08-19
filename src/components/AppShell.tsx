@@ -11,8 +11,8 @@ import { isLightHex } from "../lib/color";
 import type { AppView, HexColor, PaintRecord } from "../types";
 
 const NAV_ITEMS: { id: AppView; label: string; description: string }[] = [
-  { id: "lab", label: "Lab", description: "Analyze a color" },
   { id: "library", label: "Library", description: "Browse OEM paints" },
+  { id: "lab", label: "Lab", description: "Analyze a color" },
   { id: "compare", label: "Compare", description: "Measure two paints" },
   { id: "methodology", label: "Methodology", description: "Review the method" },
 ];
@@ -151,10 +151,10 @@ export default function AppShell({
       <header className="app-header">
         <div className="app-header__inner">
           <a
-            href="#/lab"
+            href="#/library"
             className="wordmark"
             aria-label="OEM Paint Lab home"
-            onClick={() => navigate("lab")}
+            onClick={() => navigate("library")}
           >
             <span className="wordmark__signal" aria-hidden="true" />
             <span>OEM Paint Lab</span>

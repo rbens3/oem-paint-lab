@@ -4,6 +4,15 @@
     "macrostructure": "Workbench",
     "theme": "Cobalt",
     "enrichment": "none",
+    "scope": "library",
+    "brief": "OEM Paint Lab archive-first Library product pass",
+    "variation": "Library default route, progressive filters, and paint-field record links"
+  },
+  {
+    "date": "2026-08-18",
+    "macrostructure": "Workbench",
+    "theme": "Cobalt",
+    "enrichment": "none",
     "scope": "app",
     "brief": "OEM Paint Lab permanent typography system",
     "variation": "Unbounded display, Lexend interface, and IBM Plex Mono technical roles"

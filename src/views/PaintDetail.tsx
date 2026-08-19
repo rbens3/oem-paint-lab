@@ -145,10 +145,10 @@ export default function PaintDetail({
             <DetailValue label="Saturation" value={`${Math.round(hsb.s * 100)}%`} />
             <DetailValue label="Brightness" value={`${Math.round(hsb.b * 100)}%`} />
           </div>
-          <div className="paint-detail-value-group paint-detail-value-group--forza">
+          <div className="paint-detail-value-group paint-detail-value-group--normalized">
             <div className="paint-detail-value-group__heading">
-              <h3>Forza normalized HSB</h3>
-              <CopyButton value={normalizedValue} label="Copy values" />
+              <h3>Normalized HSB · 0–1</h3>
+              <CopyButton value={normalizedValue} label="Copy normalized" />
             </div>
             <DetailValue label="H" value={hsb.h.toFixed(3)} />
             <DetailValue label="S" value={hsb.s.toFixed(3)} />

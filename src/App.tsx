@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import AppShell from "./components/AppShell";
 import { paints } from "./data/paints";
 import { normalizeHex } from "./lib/color";
+import { DEFAULT_LIBRARY_STATE, type LibraryState } from "./lib/paint";
 import type { AppRoute, AppView, HexColor, PaintRecord } from "./types";
 import Compare from "./views/Compare";
 import Lab from "./views/Lab";
@@ -13,6 +14,18 @@ const DEFAULT_PAINT = paints.find((paint) => paint.id === 2) ?? paints[0];
 
 const isPrimaryView = (value: string): value is Exclude<AppView, "paint"> =>
   ["lab", "library", "compare", "methodology"].includes(value);
+
+const getRouteKey = (route: AppRoute) =>
+  route.view === "paint" ? `paint/${route.paintId}` : route.view;
+
+const setWindowScrollImmediately = (top: number) => {
+  const root = document.documentElement;
+  const previousScrollBehavior = root.style.scrollBehavior;
+
+  root.style.scrollBehavior = "auto";
+  window.scrollTo({ top, left: 0, behavior: "auto" });
+  root.style.scrollBehavior = previousScrollBehavior;
+};
 
 const getRouteFromHash = (): AppRoute => {
   const value = window.location.hash.replace(/^#\/?/, "").toLowerCase();
@@ -26,11 +39,16 @@ const getRouteFromHash = (): AppRoute => {
     return { view: "library" };
   }
 
-  return { view: isPrimaryView(view) ? view : "lab" };
+  return { view: isPrimaryView(view) ? view : "library" };
 };
 
 export default function App() {
   const [route, setRoute] = useState<AppRoute>(getRouteFromHash);
+  const [libraryState, setLibraryState] = useState<LibraryState>(() => ({
+    ...DEFAULT_LIBRARY_STATE,
+  }));
+  const previousRouteRef = useRef<AppRoute | null>(null);
+  const libraryScrollRef = useRef<number | null>(null);
   const [selection, setSelection] = useState<{
     hex: HexColor;
     paint: PaintRecord | null;
@@ -40,14 +58,48 @@ export default function App() {
   });
 
   useEffect(() => {
+    const previousScrollRestoration = window.history.scrollRestoration;
+    window.history.scrollRestoration = "manual";
+
     if (!window.location.hash) {
-      window.history.replaceState(null, "", "#/lab");
+      window.history.replaceState(null, "", "#/library");
     }
 
     const handleHashChange = () => setRoute(getRouteFromHash());
     window.addEventListener("hashchange", handleHashChange);
-    return () => window.removeEventListener("hashchange", handleHashChange);
+    return () => {
+      window.removeEventListener("hashchange", handleHashChange);
+      window.history.scrollRestoration = previousScrollRestoration;
+    };
   }, []);
+
+  useLayoutEffect(() => {
+    const previousRoute = previousRouteRef.current;
+    const isDuplicateRoute =
+      previousRoute && getRouteKey(previousRoute) === getRouteKey(route);
+
+    if (isDuplicateRoute) {
+      return;
+    }
+
+    if (route.view === "paint") {
+      setWindowScrollImmediately(0);
+    } else if (
+      route.view === "library" &&
+      previousRoute?.view === "paint" &&
+      libraryScrollRef.current !== null
+    ) {
+      setWindowScrollImmediately(libraryScrollRef.current);
+    } else if (previousRoute) {
+      setWindowScrollImmediately(0);
+
+      if (route.view === "library" || previousRoute.view === "paint") {
+        libraryScrollRef.current = null;
+      }
+    }
+
+    previousRouteRef.current = route;
+  }, [route]);
 
   useEffect(() => {
     const detailPaint =
@@ -78,7 +130,6 @@ export default function App() {
     if (window.location.hash !== nextHash) {
       window.location.hash = nextHash;
     }
-    window.scrollTo({ top: 0, behavior: "auto" });
   };
 
   const selectHex = (hex: HexColor) => {
@@ -106,13 +157,18 @@ export default function App() {
   };
 
   const inspectPaint = (paint: PaintRecord) => {
+    if (route.view === "library") {
+      libraryScrollRef.current = window.scrollY;
+    } else if (route.view !== "paint") {
+      libraryScrollRef.current = null;
+    }
+
     selectPaint(paint);
     setRoute({ view: "paint", paintId: paint.id });
     const nextHash = `#/paint/${paint.id}`;
     if (window.location.hash !== nextHash) {
       window.location.hash = nextHash;
     }
-    window.scrollTo({ top: 0, behavior: "auto" });
   };
 
   const comparePaint = (paint: PaintRecord) => {
@@ -125,8 +181,9 @@ export default function App() {
       case "library":
         return (
           <Library
-            onAnalyzePaint={analyzePaint}
             onInspectPaint={inspectPaint}
+            state={libraryState}
+            onStateChange={setLibraryState}
           />
         );
       case "compare":

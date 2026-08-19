@@ -28,6 +28,8 @@
   --color-transparent: transparent;
   --color-paint: oklch(62% 0.1 255);
   --color-paint-ink: var(--color-graphite-ink);
+  --color-paint-field-dark-ink: oklch(10% 0.008 258);
+  --color-paint-field-light-ink: oklch(99% 0.004 250);
   --color-paint-wash: color-mix(in oklch, var(--color-paint) 13%, var(--color-paper));
   --color-paint-rule: color-mix(in oklch, var(--color-paint) 42%, var(--color-rule));
   --color-selection: color-mix(in oklch, var(--color-paint) 24%, var(--color-paper));

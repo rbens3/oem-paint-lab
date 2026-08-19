@@ -23,8 +23,8 @@ export default function PaintField({
   const style: PaintStyle = {
     "--paint-field": normalized,
     "--paint-field-ink": isLightHex(normalized)
-      ? "var(--color-ink)"
-      : "var(--color-graphite-ink)",
+      ? "var(--color-paint-field-dark-ink)"
+      : "var(--color-paint-field-light-ink)",
   };
 
   return (

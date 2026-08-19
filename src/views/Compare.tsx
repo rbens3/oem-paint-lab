@@ -72,7 +72,7 @@ function PaintComparisonPanel({ paint }: { paint: PaintRecord }) {
             <dd>{Math.round(hsb.h * 360)}° · {Math.round(hsb.s * 100)}% · {Math.round(hsb.b * 100)}%</dd>
           </div>
           <div>
-            <dt>Normalized</dt>
+            <dt>Normalized HSB</dt>
             <dd>{hsb.h.toFixed(3)} · {hsb.s.toFixed(3)} · {hsb.b.toFixed(3)}</dd>
           </div>
         </dl>

@@ -203,10 +203,10 @@ export default function Lab({
 
           <div className="value-group value-group--dark">
             <div className="value-group__heading">
-              <h3>Forza normalized HSB</h3>
+              <h3>Normalized HSB · 0–1</h3>
               <CopyButton
                 value={`${hsb.h.toFixed(3)}, ${hsb.s.toFixed(3)}, ${hsb.b.toFixed(3)}`}
-                label="Copy values"
+                label="Copy normalized"
               />
             </div>
             <ValueRow label="H" value={hsb.h.toFixed(3)} />
