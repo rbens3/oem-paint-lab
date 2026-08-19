@@ -7,69 +7,105 @@ import { compareHexColors } from "../lib/similarity";
 import {
   PAINT_COLLECTIONS,
   PAINT_COLLECTION_LABELS,
-  PAINT_CONFIDENCE_LABELS,
-  type PaintRecord,
+  type ColorTarget,
+  type CustomColor,
 } from "../types";
 
 interface CompareProps {
-  selectedPaint: PaintRecord | null;
-  onAnalyzePaint: (paint: PaintRecord) => void;
+  selectedTarget: ColorTarget | null;
+  customColors: CustomColor[];
+  onAnalyzeTarget: (target: ColorTarget) => void;
 }
 
-function PaintOptions() {
-  return PAINT_COLLECTIONS.map((collection) => (
-    <optgroup
-      key={collection}
-      label={PAINT_COLLECTION_LABELS[collection]}
-    >
-      {paints
-        .filter((paint) => paint.collection === collection)
-        .map((paint) => (
-          <option key={paint.id} value={paint.id}>
-            {paint.brand} — {paint.name}
-          </option>
-        ))}
-    </optgroup>
-  ));
+const getTargetKey = (target: ColorTarget) =>
+  target.kind === "archive"
+    ? `archive:${target.paint.id}`
+    : `custom:${target.color.id}`;
+
+const getTargetHex = (target: ColorTarget) =>
+  target.kind === "archive" ? target.paint.hex : target.color.hex;
+
+const resolveTarget = (
+  key: string,
+  customColors: CustomColor[],
+): ColorTarget | null => {
+  const [kind, id] = key.split(":");
+  if (kind === "archive") {
+    const paint = paints.find((item) => item.id === Number(id));
+    return paint ? { kind: "archive", paint } : null;
+  }
+  if (kind === "custom") {
+    const color = customColors.find((item) => item.id === id);
+    return color ? { kind: "custom", color } : null;
+  }
+  return null;
+};
+
+function ColorOptions({ customColors }: { customColors: CustomColor[] }) {
+  return (
+    <>
+      {customColors.length ? (
+        <optgroup label="My Colors · Custom">
+          {customColors.map((color) => (
+            <option key={color.id} value={`custom:${color.id}`}>
+              {color.name}
+            </option>
+          ))}
+        </optgroup>
+      ) : null}
+      {PAINT_COLLECTIONS.map((collection) => (
+        <optgroup key={collection} label={PAINT_COLLECTION_LABELS[collection]}>
+          {paints
+            .filter((paint) => paint.collection === collection)
+            .map((paint) => (
+              <option key={paint.id} value={`archive:${paint.id}`}>
+                {paint.brand} — {paint.name}
+              </option>
+            ))}
+        </optgroup>
+      ))}
+    </>
+  );
 }
 
-function PaintComparisonPanel({ paint }: { paint: PaintRecord }) {
-  const rgb = hexToRgb(paint.hex);
-  const hsb = hexToHsb(paint.hex);
+function ColorComparisonPanel({ target }: { target: ColorTarget }) {
+  const color = target.kind === "archive" ? target.paint : target.color;
+  const rgb = hexToRgb(color.hex);
+  const hsb = hexToHsb(color.hex);
+  const label =
+    target.kind === "archive"
+      ? target.paint.collection === "other"
+        ? "Other collection"
+        : `${PAINT_COLLECTION_LABELS[target.paint.collection]} · ${target.paint.brand}`
+      : "My Colors · Custom";
 
   return (
     <article className="compare-panel">
       <PaintField
-        hex={paint.hex}
+        hex={color.hex}
         className="compare-panel__field"
-        label={`${paint.brand} ${paint.name} color field`}
+        label={`${color.name} color field`}
       >
         <div className="compare-panel__field-identity">
-          <span>
-            {paint.collection === "other"
-              ? "Other collection"
-              : `${PAINT_COLLECTION_LABELS[paint.collection]} · ${paint.brand}`}
-          </span>
-          <h2>{paint.name}</h2>
+          <span>{label}</span>
+          <h2>{color.name}</h2>
         </div>
         <div className="compare-panel__field-value">
-          <strong>{paint.hex}</strong>
-          <CopyButton value={paint.hex} label="Copy HEX" />
+          <strong>{color.hex}</strong>
+          <CopyButton value={color.hex} label="Copy HEX" />
         </div>
       </PaintField>
       {rgb && hsb ? (
         <dl className="compare-specs">
           <div>
-            <dt>Provenance</dt>
-            <dd>{PAINT_CONFIDENCE_LABELS[paint.confidence]}</dd>
-          </div>
-          <div>
             <dt>RGB</dt>
             <dd>{rgb.r} · {rgb.g} · {rgb.b}</dd>
           </div>
           <div>
-            <dt>HSB</dt>
-            <dd>{Math.round(hsb.h * 360)}° · {Math.round(hsb.s * 100)}% · {Math.round(hsb.b * 100)}%</dd>
+            <dt>HSB / HSV</dt>
+            <dd>
+              {Math.round(hsb.h * 360)}° · {Math.round(hsb.s * 100)}% · {Math.round(hsb.b * 100)}%
+            </dd>
           </div>
           <div>
             <dt>Normalized HSB</dt>
@@ -81,22 +117,32 @@ function PaintComparisonPanel({ paint }: { paint: PaintRecord }) {
   );
 }
 
-export default function Compare({ selectedPaint, onAnalyzePaint }: CompareProps) {
-  const initialLeft = selectedPaint?.id ?? 2;
-  const [leftId, setLeftId] = useState(initialLeft);
-  const [rightId, setRightId] = useState(3);
+export default function Compare({
+  selectedTarget,
+  customColors,
+  onAnalyzeTarget,
+}: CompareProps) {
+  const initialLeftKey = selectedTarget
+    ? getTargetKey(selectedTarget)
+    : "archive:2";
+  const [leftKey, setLeftKey] = useState(initialLeftKey);
+  const [rightKey, setRightKey] = useState("archive:3");
 
   useEffect(() => {
-    if (selectedPaint) {
-      setLeftId(selectedPaint.id);
+    if (selectedTarget) {
+      setLeftKey(getTargetKey(selectedTarget));
     }
-  }, [selectedPaint]);
+  }, [selectedTarget]);
 
-  const leftPaint = paints.find((paint) => paint.id === leftId) ?? paints[0];
-  const rightPaint = paints.find((paint) => paint.id === rightId) ?? paints[1];
+  const leftTarget: ColorTarget =
+    resolveTarget(leftKey, customColors) ?? { kind: "archive", paint: paints[0] };
+  const rightTarget: ColorTarget =
+    resolveTarget(rightKey, customColors) ?? { kind: "archive", paint: paints[1] };
+  const leftHex = getTargetHex(leftTarget);
+  const rightHex = getTargetHex(rightTarget);
   const comparison = useMemo(
-    () => compareHexColors(leftPaint.hex, rightPaint.hex),
-    [leftPaint.hex, rightPaint.hex],
+    () => compareHexColors(leftHex, rightHex),
+    [leftHex, rightHex],
   );
 
   return (
@@ -105,21 +151,21 @@ export default function Compare({ selectedPaint, onAnalyzePaint }: CompareProps)
         <div>
           <h1>Compare</h1>
           <p>
-            Place two library records side by side and measure their perceptual
+            Place archive or custom colors side by side and measure their perceptual
             separation with CIEDE2000.
           </p>
         </div>
       </section>
 
-      <section className="compare-selectors" aria-label="Choose paints to compare">
+      <section className="compare-selectors" aria-label="Choose colors to compare">
         <label className="field-group">
-          <span className="field-label">Paint A</span>
+          <span className="field-label">Color A</span>
           <select
             className="select-input"
-            value={leftId}
-            onChange={(event) => setLeftId(Number(event.target.value))}
+            value={getTargetKey(leftTarget)}
+            onChange={(event) => setLeftKey(event.target.value)}
           >
-            <PaintOptions />
+            <ColorOptions customColors={customColors} />
           </select>
         </label>
         <div className="compare-selector-center">
@@ -135,29 +181,29 @@ export default function Compare({ selectedPaint, onAnalyzePaint }: CompareProps)
             type="button"
             className="compare-swap"
             onClick={() => {
-              setLeftId(rightId);
-              setRightId(leftId);
+              setLeftKey(getTargetKey(rightTarget));
+              setRightKey(getTargetKey(leftTarget));
             }}
-            aria-label="Swap compared paints"
+            aria-label="Swap compared colors"
           >
             Swap
           </button>
         </div>
         <label className="field-group">
-          <span className="field-label">Paint B</span>
+          <span className="field-label">Color B</span>
           <select
             className="select-input"
-            value={rightId}
-            onChange={(event) => setRightId(Number(event.target.value))}
+            value={getTargetKey(rightTarget)}
+            onChange={(event) => setRightKey(event.target.value)}
           >
-            <PaintOptions />
+            <ColorOptions customColors={customColors} />
           </select>
         </label>
       </section>
 
-      <section className="compare-grid" aria-label="Paint comparison">
-        <PaintComparisonPanel paint={leftPaint} />
-        <PaintComparisonPanel paint={rightPaint} />
+      <section className="compare-grid" aria-label="Color comparison">
+        <ColorComparisonPanel target={leftTarget} />
+        <ColorComparisonPanel target={rightTarget} />
       </section>
 
       <section className="comparison-result" aria-labelledby="comparison-result-title">
@@ -176,16 +222,16 @@ export default function Compare({ selectedPaint, onAnalyzePaint }: CompareProps)
           <button
             type="button"
             className="button button--secondary"
-            onClick={() => onAnalyzePaint(leftPaint)}
+            onClick={() => onAnalyzeTarget(leftTarget)}
           >
-            Analyze first paint
+            Analyze first color
           </button>
           <button
             type="button"
             className="button button--secondary"
-            onClick={() => onAnalyzePaint(rightPaint)}
+            onClick={() => onAnalyzeTarget(rightTarget)}
           >
-            Analyze second paint
+            Analyze second color
           </button>
         </div>
       </section>

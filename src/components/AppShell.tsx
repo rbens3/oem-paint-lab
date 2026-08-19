@@ -12,6 +12,7 @@ import type { AppView, HexColor, PaintRecord } from "../types";
 
 const NAV_ITEMS: { id: AppView; label: string; description: string }[] = [
   { id: "library", label: "Library", description: "Browse OEM paints" },
+  { id: "my-colors", label: "My Colors", description: "Open saved colors" },
   { id: "lab", label: "Lab", description: "Analyze a color" },
   { id: "compare", label: "Compare", description: "Measure two paints" },
   { id: "methodology", label: "Methodology", description: "Review the method" },
@@ -166,7 +167,12 @@ export default function AppShell({
                 key={item.id}
                 href={`#/${item.id}`}
                 className="primary-nav__link"
-                aria-current={activeView === item.id ? "page" : undefined}
+                aria-current={
+                  activeView === item.id ||
+                  (activeView === "custom" && item.id === "my-colors")
+                    ? "page"
+                    : undefined
+                }
                 onClick={() => navigate(item.id)}
               >
                 {item.label}
@@ -207,7 +213,12 @@ export default function AppShell({
               key={item.id}
               href={`#/${item.id}`}
               className="mobile-nav__link"
-              aria-current={activeView === item.id ? "page" : undefined}
+              aria-current={
+                activeView === item.id ||
+                (activeView === "custom" && item.id === "my-colors")
+                  ? "page"
+                  : undefined
+              }
               onClick={() => navigate(item.id)}
             >
               <span>{item.label}</span>

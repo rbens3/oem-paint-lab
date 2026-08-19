@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import CopyButton from "../components/CopyButton";
+import CustomColorDialog from "../components/CustomColorDialog";
 import PaintField from "../components/PaintField";
 import { paints } from "../data/paints";
 import {
@@ -13,6 +14,8 @@ import { findSimilarPaints } from "../lib/similarity";
 import {
   PAINT_COLLECTION_LABELS,
   PAINT_CONFIDENCE_LABELS,
+  type CustomColor,
+  type CustomColorInput,
   type FlakeType,
   type HexColor,
   type PaintRecord,
@@ -21,9 +24,15 @@ import {
 interface LabProps {
   selectedHex: HexColor;
   selectedPaint: PaintRecord | null;
+  selectedCustomColor: CustomColor | null;
   onHexChange: (hex: HexColor) => void;
   onAnalyzePaint: (paint: PaintRecord) => void;
   onInspectPaint: (paint: PaintRecord) => void;
+  onCreateCustomColor: (input: CustomColorInput) => CustomColor;
+  onUpdateCustomColor: (
+    id: string,
+    input: CustomColorInput,
+  ) => CustomColor | null;
 }
 
 interface ValueRowProps {
@@ -43,13 +52,17 @@ function ValueRow({ label, value }: ValueRowProps) {
 export default function Lab({
   selectedHex,
   selectedPaint,
+  selectedCustomColor,
   onHexChange,
   onAnalyzePaint,
   onInspectPaint,
+  onCreateCustomColor,
+  onUpdateCustomColor,
 }: LabProps) {
   const [hexDraft, setHexDraft] = useState(selectedHex.slice(1));
   const [hexTouched, setHexTouched] = useState(false);
   const [flakeType, setFlakeType] = useState<FlakeType>("silver");
+  const [saveMessage, setSaveMessage] = useState("");
 
   useEffect(() => {
     setHexDraft(selectedHex.slice(1));
@@ -73,6 +86,7 @@ export default function Lab({
   const updateHexDraft = (value: string) => {
     const clean = value.replace(/[^0-9a-fA-F]/g, "").slice(0, 6).toUpperCase();
     setHexDraft(clean);
+    setSaveMessage("");
 
     if (clean.length === 6) {
       const normalized = normalizeHex(clean);
@@ -106,13 +120,19 @@ export default function Lab({
           >
             <div className="lab-color-preview__topline">
               <div className="lab-color-preview__identity">
-                <span>{selectedPaint?.brand ?? "Custom sample"}</span>
-                <strong>{selectedPaint?.name ?? "Custom color"}</strong>
+                <span>
+                  {selectedPaint?.brand ?? (selectedCustomColor ? "Custom" : "Custom sample")}
+                </span>
+                <strong>
+                  {selectedPaint?.name ?? selectedCustomColor?.name ?? "Custom color"}
+                </strong>
               </div>
               <span className="lab-color-preview__confidence">
                 {selectedPaint
                   ? PAINT_CONFIDENCE_LABELS[selectedPaint.confidence]
-                  : "Custom sample"}
+                  : selectedCustomColor
+                    ? "My Colors"
+                    : "Custom sample"}
               </span>
             </div>
             <div className="lab-color-preview__value">
@@ -120,6 +140,26 @@ export default function Lab({
               <CopyButton value={selectedHex} label="Copy HEX" />
             </div>
           </PaintField>
+
+          <div className="lab-color-actions">
+            <CustomColorDialog
+              initialHex={selectedHex}
+              initialColor={selectedCustomColor ?? undefined}
+              triggerLabel="Save color"
+              triggerClassName="button button--secondary"
+              onSave={(input) => {
+                const saved = selectedCustomColor
+                  ? onUpdateCustomColor(selectedCustomColor.id, input)
+                  : onCreateCustomColor(input);
+                setSaveMessage(
+                  saved ? `${saved.name} saved to My Colors.` : "Color could not be saved.",
+                );
+              }}
+            />
+            <span className="lab-color-actions__status" aria-live="polite">
+              {saveMessage}
+            </span>
+          </div>
 
           <div className="hex-control">
             <div className="field-group">

@@ -16,10 +16,13 @@ import {
 
 interface PaintDetailProps {
   paint: PaintRecord;
-  onBackToLibrary: () => void;
+  backLabel: string;
+  onBack: () => void;
   onOpenInLab: (paint: PaintRecord) => void;
   onComparePaint: (paint: PaintRecord) => void;
   onInspectPaint: (paint: PaintRecord) => void;
+  isSaved: boolean;
+  onToggleSaved: () => void;
 }
 
 interface DetailValueProps {
@@ -38,10 +41,13 @@ function DetailValue({ label, value }: DetailValueProps) {
 
 export default function PaintDetail({
   paint,
-  onBackToLibrary,
+  backLabel,
+  onBack,
   onOpenInLab,
   onComparePaint,
   onInspectPaint,
+  isSaved,
+  onToggleSaved,
 }: PaintDetailProps) {
   const rgb = hexToRgb(paint.hex);
   const hsb = hexToHsb(paint.hex);
@@ -67,9 +73,9 @@ export default function PaintDetail({
         <button
           type="button"
           className="paint-detail-back"
-          onClick={onBackToLibrary}
+          onClick={onBack}
         >
-          Back to Library
+          {backLabel}
         </button>
         <div className="paint-detail-intro__identity">
           <span>
@@ -119,6 +125,14 @@ export default function PaintDetail({
               onClick={() => onComparePaint(paint)}
             >
               Send to Compare
+            </button>
+            <button
+              type="button"
+              className="button button--secondary"
+              onClick={onToggleSaved}
+              aria-pressed={isSaved}
+            >
+              {isSaved ? "Remove from My Colors" : "Save to My Colors"}
             </button>
           </div>
         </div>
