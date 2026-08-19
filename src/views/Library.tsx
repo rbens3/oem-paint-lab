@@ -325,7 +325,7 @@ export default function Library({
                   setConfidence(event.target.value as PaintConfidence | "all")
                 }
               >
-                <option value="all">All confidence levels</option>
+                <option value="all">All provenance levels</option>
                 {PAINT_CONFIDENCES.map((item) => (
                   <option key={item} value={item}>
                     {PAINT_CONFIDENCE_LABELS[item]}

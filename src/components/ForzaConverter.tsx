@@ -53,7 +53,6 @@ const CONFIDENCE_STYLES: Record<
   PaintConfidence,
   { color: string; label: string; bg: string }
 > = {
-  verified: { color: "#22c55e", label: "✓ VERIFIED", bg: "#22c55e18" },
   reference: { color: "#60a5fa", label: "REFERENCE", bg: "#60a5fa18" },
   estimated: { color: "#f59e0b", label: "~ ESTIMATED", bg: "#f59e0b18" },
 };
@@ -160,9 +159,7 @@ function ColorCard({ color, onHexChange }: ColorCardProps) {
             )}
             {color.hex && <CopyBtn text={color.hex} />}
           </div>
-          {color.confidence !== "verified" && (
-            <div style={{ fontSize:10, color:"#444", marginTop:3, fontStyle:"italic" }}>{color.note}</div>
-          )}
+          <div style={{ fontSize:10, color:"#444", marginTop:3, fontStyle:"italic" }}>{color.note}</div>
         </div>
         {filled && forza && (
           <div style={{ display:"flex", flexDirection:"column", justifyContent:"center", gap:2, padding:"10px 10px 10px 14px", borderLeft:"1px solid #ffffff0a", minWidth:155, background:"#0d0d0d" }}>
@@ -210,7 +207,6 @@ export default function ForzaConverter() {
     return matchBrand && matchSearch;
   });
 
-  const verified = colors.filter(c=>c.confidence==="verified").length;
   const reference = colors.filter(c=>c.confidence==="reference").length;
   const estimated = colors.filter(c=>c.confidence==="estimated").length;
 
@@ -221,7 +217,6 @@ export default function ForzaConverter() {
         <h1 style={{ margin:"0 0 8px", fontSize:24, fontWeight:700, color:"#f8f8f8", letterSpacing:"-0.02em" }}>Paint Color Converter</h1>
 
         <div style={{ display:"flex", gap:12, flexWrap:"wrap", marginBottom:14 }}>
-          <div style={{ background:"#22c55e18", border:"1px solid #22c55e33", borderRadius:6, padding:"4px 12px", fontSize:11, color:"#22c55e", fontFamily:"monospace" }}>✓ {verified} VERIFIED</div>
           <div style={{ background:"#60a5fa18", border:"1px solid #60a5fa33", borderRadius:6, padding:"4px 12px", fontSize:11, color:"#60a5fa", fontFamily:"monospace" }}>{reference} REFERENCE</div>
           <div style={{ background:"#f59e0b18", border:"1px solid #f59e0b33", borderRadius:6, padding:"4px 12px", fontSize:11, color:"#f59e0b", fontFamily:"monospace" }}>~ {estimated} ESTIMATED</div>
           <div style={{ fontSize:11, color:"#444", fontFamily:"monospace", alignSelf:"center" }}>H=hue°÷360 · S=sat%÷100 · B=val%÷100 · ▼ FLAKE for metallic layers</div>

@@ -17,7 +17,7 @@ const METHODS = [
   },
   {
     title: "Evidence before certainty",
-    body: "Every record is assigned a conservative confidence level from its existing source note. Missing evidence is kept visible; it is never promoted to manufacturer verification by inference.",
+    body: "Every record is assigned a conservative provenance level from its existing source note. Missing evidence stays visible, and no record is promoted by inference.",
   },
   {
     title: "Perceptual matching",
@@ -33,11 +33,9 @@ const METHODS = [
   },
 ];
 
-const confidenceDefinitions = {
-  verified:
-    "Supported by a manufacturer or equivalent first-party specification. None of the current records meet this threshold yet.",
+const provenanceDefinitions = {
   reference:
-    "A traceable digital value from a secondary database, supplied reference, or in-game source.",
+    "A traceable digital value from a secondary database, supplied reference, or in-game source. It may be well sourced while remaining a screen reference rather than an official physical paint specification.",
   estimated:
     "A value derived or updated from imagery, paint chips, livery photography, or an explicitly approximate source.",
 } as const;
@@ -86,7 +84,10 @@ export default function Methodology() {
       <section className="method-confidence" aria-labelledby="confidence-title">
         <div className="paint-detail-section-heading">
           <h2 id="confidence-title">Provenance model</h2>
-          <p>Confidence describes source quality, not perceptual match quality.</p>
+          <p>
+            Provenance describes how a digital value was derived, not its perceptual
+            match to physical paint.
+          </p>
         </div>
         <dl className="method-confidence__list">
           {PAINT_CONFIDENCES.map((confidence) => (
@@ -97,10 +98,27 @@ export default function Methodology() {
                   {paints.filter((paint) => paint.confidence === confidence).length}
                 </strong>
               </dt>
-              <dd>{confidenceDefinitions[confidence]}</dd>
+              <dd>{provenanceDefinitions[confidence]}</dd>
             </div>
           ))}
         </dl>
+        <aside className="method-confidence__context" aria-labelledby="verified-context-title">
+          <span>Why there is no Verified tier</span>
+          <h3 id="verified-context-title">A HEX value cannot verify physical paint.</h3>
+          <p>
+            Automotive paint changes with illumination, viewing angle, substrate,
+            clear-coat depth, and metallic or pearl behavior. Cameras, image
+            processing, and displays add further transformations. A well-sourced
+            digital reference is therefore not the same thing as an official physical
+            paint specification.
+          </p>
+          <p>
+            No current record clears that distinction, so OEM Paint Lab does not
+            present a Verified status. The model can evolve when stronger first-party
+            specifications or appropriately measured references become available;
+            records will not be promoted by inference.
+          </p>
+        </aside>
       </section>
 
       <section className="method-notes">
@@ -157,7 +175,7 @@ export default function Methodology() {
         <p>
           Paint code and finish metadata are shown only where the current record can
           support them. Unknown fields remain explicit rather than being filled with
-          plausible but unverified claims. Original source notes remain available on
+          plausible but unsupported claims. Original source notes remain available on
           every paint record.
         </p>
       </section>

@@ -11,7 +11,7 @@ export const PAINT_BRANDS = [
 
 export type PaintBrand = (typeof PAINT_BRANDS)[number];
 
-export const PAINT_CONFIDENCES = ["verified", "reference", "estimated"] as const;
+export const PAINT_CONFIDENCES = ["reference", "estimated"] as const;
 export type PaintConfidence = (typeof PAINT_CONFIDENCES)[number];
 
 export const PAINT_COLLECTIONS = ["oem", "motorsport", "other"] as const;
@@ -58,7 +58,6 @@ export const PAINT_COLLECTION_LABELS: Record<PaintCollection, string> = {
 };
 
 export const PAINT_CONFIDENCE_LABELS: Record<PaintConfidence, string> = {
-  verified: "Verified",
   reference: "Reference",
   estimated: "Estimated",
 };

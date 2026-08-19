@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import CopyButton from "../components/CopyButton";
+import CorrectionDialog from "../components/CorrectionDialog";
 import PaintField from "../components/PaintField";
 import { paints } from "../data/paints";
 import { hexToHsb, hexToRgb } from "../lib/color";
@@ -184,7 +185,7 @@ export default function PaintDetail({
             <dd>{PAINT_COLOR_FAMILY_LABELS[paint.colorFamily]}</dd>
           </div>
           <div>
-            <dt>Confidence</dt>
+            <dt>Provenance</dt>
             <dd>{PAINT_CONFIDENCE_LABELS[paint.confidence]}</dd>
           </div>
         </dl>
@@ -193,9 +194,14 @@ export default function PaintDetail({
       <section className="paint-detail-provenance" aria-labelledby="provenance-title">
         <div>
           <h2 id="provenance-title">Provenance</h2>
-          <p>{paint.note}</p>
+          <p>How this digital reference is sourced and interpreted.</p>
+          <CorrectionDialog paint={paint} />
         </div>
         <dl>
+          <div>
+            <dt>Provenance</dt>
+            <dd>{PAINT_CONFIDENCE_LABELS[paint.confidence]}</dd>
+          </div>
           <div>
             <dt>Source</dt>
             <dd>{paint.source}</dd>
@@ -209,6 +215,10 @@ export default function PaintDetail({
             <dd>
               This value is a screen reference, not a physical paint specification.
             </dd>
+          </div>
+          <div>
+            <dt>Original source note</dt>
+            <dd>{paint.note}</dd>
           </div>
         </dl>
       </section>
