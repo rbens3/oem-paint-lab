@@ -5,6 +5,7 @@ import DeleteCustomColorDialog from "../components/DeleteCustomColorDialog";
 import PaintField from "../components/PaintField";
 import { paints } from "../data/paints";
 import { hexToHsb, hexToRgb } from "../lib/color";
+import { getPaintDisplayGroup } from "../lib/paint";
 import { findSimilarPaints } from "../lib/similarity";
 import type { CustomColor, CustomColorInput, PaintRecord } from "../types";
 
@@ -177,7 +178,7 @@ export default function CustomColorDetail({
                 type="button"
                 className="paint-detail-related__select"
                 onClick={() => onInspectPaint(paint)}
-                aria-label={`View details for ${paint.brand} ${paint.name}`}
+                aria-label={`View details for ${getPaintDisplayGroup(paint)} ${paint.name}`}
               >
                 <PaintField
                   hex={paint.hex}
@@ -186,7 +187,7 @@ export default function CustomColorDetail({
                 />
                 <span>
                   <strong>{paint.name}</strong>
-                  <small>{paint.brand} · {paint.hex}</small>
+                  <small>{getPaintDisplayGroup(paint)} · {paint.hex}</small>
                 </span>
                 <span>
                   <small>ΔE00</small>

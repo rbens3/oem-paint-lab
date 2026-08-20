@@ -8,10 +8,15 @@ import {
 } from "react";
 import { paints } from "../data/paints";
 import { isLightHex } from "../lib/color";
+import {
+  getPaintDisplayGroup,
+  getPaintDisplayName,
+  getPaintSearchText,
+} from "../lib/paint";
 import type { AppView, HexColor, PaintRecord } from "../types";
 
 const NAV_ITEMS: { id: AppView; label: string; description: string }[] = [
-  { id: "library", label: "Library", description: "Browse OEM paints" },
+  { id: "library", label: "Library", description: "Browse the paint archive" },
   { id: "my-colors", label: "My Colors", description: "Open saved colors" },
   { id: "lab", label: "Lab", description: "Analyze a color" },
   { id: "compare", label: "Compare", description: "Measure two paints" },
@@ -82,7 +87,7 @@ export default function AppShell({
   }, []);
 
   const commands = useMemo<CommandItem[]>(() => {
-    const query = commandQuery.trim().toLowerCase();
+    const query = commandQuery.trim().toLocaleLowerCase();
     const viewCommands = NAV_ITEMS.filter(
       (item) =>
         !query ||
@@ -101,14 +106,13 @@ export default function AppShell({
     const paintCommands = paints
       .filter(
         (paint) =>
-          query &&
-          `${paint.brand} ${paint.name} ${paint.hex}`.toLowerCase().includes(query),
+          query && getPaintSearchText(paint).includes(query),
       )
       .slice(0, 8)
       .map((paint) => ({
         id: `paint-${paint.id}`,
-        label: paint.name,
-        meta: `${paint.brand} · ${paint.hex}`,
+        label: getPaintDisplayName(paint),
+        meta: `${getPaintDisplayGroup(paint)} · ${paint.hex}`,
         action: () => {
           onSelectPaint(paint);
           navigate("lab");
@@ -233,7 +237,7 @@ export default function AppShell({
       <footer className="app-footer">
         <div className="app-footer__inner">
           <span>OEM Paint Lab</span>
-          <span>173 paint records · CIELAB D65 · CIEDE2000</span>
+          <span>{paints.length} paint records · CIELAB D65 · CIEDE2000</span>
           <span>Digital color reference tool</span>
         </div>
       </footer>
@@ -256,7 +260,10 @@ export default function AppShell({
           <div className="command-dialog__header">
             <div>
               <h2 id="command-title">Open a view or paint</h2>
-              <p>Search all 173 records by manufacturer, name, or HEX.</p>
+              <p>
+                Search all {paints.length} records by paint, code, manufacturer,
+                team, series, or HEX.
+              </p>
             </div>
             <button
               type="button"

@@ -10,9 +10,9 @@ import {
   normalizeHex,
 } from "../lib/color";
 import { FLAKE_TYPES, generateFlake } from "../lib/finishes";
+import { getPaintDisplayGroup } from "../lib/paint";
 import { findSimilarPaints } from "../lib/similarity";
 import {
-  PAINT_COLLECTION_LABELS,
   PAINT_CONFIDENCE_LABELS,
   type CustomColor,
   type CustomColorInput,
@@ -106,7 +106,7 @@ export default function Lab({
           <h1 id="lab-title">OEM Paint Lab</h1>
           <p>
             Analyze a digital color, translate it into useful values, and locate the
-            closest references in a 173-record paint library.
+            closest references in a {paints.length}-record paint archive.
           </p>
         </div>
       </section>
@@ -121,7 +121,11 @@ export default function Lab({
             <div className="lab-color-preview__topline">
               <div className="lab-color-preview__identity">
                 <span>
-                  {selectedPaint?.brand ?? (selectedCustomColor ? "Custom" : "Custom sample")}
+                  {selectedPaint
+                    ? getPaintDisplayGroup(selectedPaint)
+                    : selectedCustomColor
+                      ? "Custom"
+                      : "Custom sample"}
                 </span>
                 <strong>
                   {selectedPaint?.name ?? selectedCustomColor?.name ?? "Custom color"}
@@ -275,7 +279,7 @@ export default function Lab({
                 type="button"
                 className="match-row__select"
                 onClick={() => onInspectPaint(paint)}
-                aria-label={`View details for ${paint.brand} ${paint.name}`}
+                aria-label={`View details for ${getPaintDisplayGroup(paint)} ${paint.name}`}
               >
                 <PaintField
                   hex={paint.hex}
@@ -286,9 +290,7 @@ export default function Lab({
                 <span className="match-row__identity">
                   <strong>{paint.name}</strong>
                   <span>
-                    {paint.collection === "other"
-                      ? "Other collection"
-                      : `${paint.brand} · ${PAINT_COLLECTION_LABELS[paint.collection]}`}
+                    {getPaintDisplayGroup(paint)}
                   </span>
                 </span>
                 <span className="match-row__hex">{paint.hex}</span>

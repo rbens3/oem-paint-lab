@@ -2686,6 +2686,12 @@ button:disabled,
   color: var(--color-graphite-ink);
 }
 
+.paint-detail-provenance > dl a {
+  color: inherit;
+  text-decoration-color: var(--color-graphite-muted);
+  text-underline-offset: 0.2em;
+}
+
 .correction-dialog {
   position: fixed;
   inset: 0;
@@ -3231,6 +3237,13 @@ button:disabled,
 }
 
 .library-manufacturer-filter {
+  padding-block-start: var(--space-xs);
+  border-block-start: var(--rule-thin) solid var(--color-rule);
+}
+
+.library-motorsport-filters {
+  display: grid;
+  gap: var(--space-sm);
   padding-block-start: var(--space-xs);
   border-block-start: var(--rule-thin) solid var(--color-rule);
 }

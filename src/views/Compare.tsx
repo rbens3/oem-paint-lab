@@ -3,12 +3,13 @@ import CopyButton from "../components/CopyButton";
 import PaintField from "../components/PaintField";
 import { paints } from "../data/paints";
 import { hexToHsb, hexToRgb } from "../lib/color";
+import { getPaintContextLabel, getPaintDisplayName } from "../lib/paint";
 import { compareHexColors } from "../lib/similarity";
 import {
-  PAINT_COLLECTIONS,
-  PAINT_COLLECTION_LABELS,
+  PAINT_ROLE_LABELS,
   type ColorTarget,
   type CustomColor,
+  type PaintRecord,
 } from "../types";
 
 interface CompareProps {
@@ -41,29 +42,73 @@ const resolveTarget = (
   return null;
 };
 
+const getCompareOptionLabel = (paint: PaintRecord): string => {
+  if (paint.collection === "oem") {
+    return `${paint.manufacturer ?? "OEM"} — ${getPaintDisplayName(paint)}`;
+  }
+  if (paint.series === "f1") {
+    const role = paint.role ? ` · ${PAINT_ROLE_LABELS[paint.role]}` : "";
+    return `${paint.team ?? "F1"} — ${paint.name}${role}`;
+  }
+  if (paint.series === "heritage") {
+    return `Heritage — ${paint.name}`;
+  }
+  return `${paint.manufacturer ?? "Other"} — ${paint.name}`;
+};
+
 function ColorOptions({ customColors }: { customColors: CustomColor[] }) {
+  const oemManufacturers = [...new Set(
+    paints
+      .filter((paint) => paint.collection === "oem" && paint.manufacturer)
+      .map((paint) => paint.manufacturer as string),
+  )].sort();
+  const f1Teams = [...new Set(
+    paints
+      .filter((paint) => paint.series === "f1" && paint.team)
+      .map((paint) => paint.team as string),
+  )].sort();
+  const heritagePaints = paints.filter((paint) => paint.series === "heritage");
+  const otherPaints = paints.filter((paint) => paint.collection === "other");
+
   return (
     <>
       {customColors.length ? (
         <optgroup label="My Colors · Custom">
           {customColors.map((color) => (
             <option key={color.id} value={`custom:${color.id}`}>
-              {color.name}
+              Custom — {color.name}
             </option>
           ))}
         </optgroup>
       ) : null}
-      {PAINT_COLLECTIONS.map((collection) => (
-        <optgroup key={collection} label={PAINT_COLLECTION_LABELS[collection]}>
-          {paints
-            .filter((paint) => paint.collection === collection)
-            .map((paint) => (
-              <option key={paint.id} value={`archive:${paint.id}`}>
-                {paint.brand} — {paint.name}
-              </option>
-            ))}
+      {oemManufacturers.map((manufacturer) => (
+        <optgroup key={manufacturer} label={`OEM Paints · ${manufacturer}`}>
+          {paints.filter((paint) => paint.manufacturer === manufacturer).map((paint) => (
+            <option key={paint.id} value={`archive:${paint.id}`}>
+              {getCompareOptionLabel(paint)}
+            </option>
+          ))}
         </optgroup>
       ))}
+      {f1Teams.map((team) => (
+        <optgroup key={team} label={`2026 F1 · ${team}`}>
+          {paints.filter((paint) => paint.series === "f1" && paint.team === team).map((paint) => (
+            <option key={paint.id} value={`archive:${paint.id}`}>
+              {getCompareOptionLabel(paint)}
+            </option>
+          ))}
+        </optgroup>
+      ))}
+      {heritagePaints.length ? (
+        <optgroup label="Motorsport · Heritage">
+          {heritagePaints.map((paint) => <option key={paint.id} value={`archive:${paint.id}`}>{getCompareOptionLabel(paint)}</option>)}
+        </optgroup>
+      ) : null}
+      {otherPaints.length ? (
+        <optgroup label="Other">
+          {otherPaints.map((paint) => <option key={paint.id} value={`archive:${paint.id}`}>{getCompareOptionLabel(paint)}</option>)}
+        </optgroup>
+      ) : null}
     </>
   );
 }
@@ -74,9 +119,7 @@ function ColorComparisonPanel({ target }: { target: ColorTarget }) {
   const hsb = hexToHsb(color.hex);
   const label =
     target.kind === "archive"
-      ? target.paint.collection === "other"
-        ? "Other collection"
-        : `${PAINT_COLLECTION_LABELS[target.paint.collection]} · ${target.paint.brand}`
+      ? getPaintContextLabel(target.paint)
       : "My Colors · Custom";
 
   return (

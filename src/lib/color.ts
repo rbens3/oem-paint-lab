@@ -44,9 +44,6 @@ export function isLightHex(hex: string): boolean {
   return rgb ? relativeLuminance(rgb) > 0.18 : false;
 }
 
-/** Backwards-compatible name used by the original converter. */
-export const hexToRGB = hexToRgb;
-
 export function rgbToHex(r: number, g: number, b: number): HexColor {
   const toHex = (channel: number) =>
     Math.round(clamp(channel, 0, 255)).toString(16).padStart(2, "0");
@@ -86,9 +83,6 @@ export function rgbToHsb(r: number, g: number, b: number): HsbColor {
     b: roundNormalized(max),
   };
 }
-
-/** Backwards-compatible name used by the original converter. */
-export const rgbToForzaHSB = rgbToHsb;
 
 export function hexToHsb(hex: string): HsbColor | null {
   const rgb = hexToRgb(hex);
@@ -152,6 +146,3 @@ export function hsbToHex(h: number, s: number, b: number): HexColor {
   const rgb = hsbToRgb(h, s, b);
   return rgbToHex(rgb.r, rgb.g, rgb.b);
 }
-
-/** Backwards-compatible name used by the original converter. */
-export const forzaHSBtoHex = hsbToHex;

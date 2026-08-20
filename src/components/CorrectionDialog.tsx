@@ -4,6 +4,7 @@ import {
   formatCorrectionProposal,
   getCorrectionSourceError,
 } from "../lib/corrections";
+import { getPaintDisplayGroup } from "../lib/paint";
 import { compareHexColors } from "../lib/similarity";
 import {
   PAINT_CONFIDENCE_LABELS,
@@ -149,7 +150,7 @@ export default function CorrectionDialog({ paint }: CorrectionDialogProps) {
           <section className="correction-reference" aria-labelledby="current-record-title">
             <div>
               <span id="current-record-title">Current reference</span>
-              <strong>{paint.brand} · {paint.name}</strong>
+              <strong>{getPaintDisplayGroup(paint)} · {paint.name}</strong>
             </div>
             <dl>
               <div>

@@ -17,19 +17,23 @@ const METHODS = [
   },
   {
     title: "Evidence before certainty",
-    body: "Every record is assigned a conservative provenance level from its existing source note. Missing evidence stays visible, and no record is promoted by inference.",
+    body: "Every record carries a structured source name, source type, optional URL, derivation note, and conservative Reference or Estimated status. Missing evidence is never promoted by inference.",
   },
   {
     title: "Perceptual matching",
     body: "sRGB values are linearized, converted through XYZ using a D65 reference white, and represented in CIELAB before CIEDE2000 distance is calculated.",
   },
   {
-    title: "Finish modeling",
-    body: "Flake suggestions are deterministic HSB offsets. They are starting recipes, not physical spectral simulations of pigment, binder, substrate, or lighting.",
+    title: "Effect and sheen",
+    body: "Archive metadata separates pigment effect—Solid, Metallic, Pearl, or Multi-layer—from surface sheen such as Gloss or Matte. Finish Lab flake suggestions remain deterministic HSB starting points, not physical spectral simulations.",
   },
   {
     title: "Archive scope",
-    body: "Factory paint references, motorsport liveries, and other digital colors remain separate collections. This keeps a useful archive broad without implying that every record is an OEM production paint.",
+    body: "The 303-record archive separates OEM paint, 2026 Formula 1 team colors, Motorsport Heritage references, and Other digital standards. This keeps the archive broad without presenting every record as factory production paint.",
+  },
+  {
+    title: "Local workspace and corrections",
+    body: "My Colors stores saved references and custom colors only in this browser. Correction proposals package record context, suggested HEX, CIEDE2000 distance, source, and explanation for copying; nothing is silently submitted or written to the archive.",
   },
 ];
 
@@ -173,10 +177,11 @@ export default function Methodology() {
       <section className="method-caveat">
         <h2>What remains intentionally unknown</h2>
         <p>
-          Paint code and finish metadata are shown only where the current record can
-          support them. Unknown fields remain explicit rather than being filled with
-          plausible but unsupported claims. Original source notes remain available on
-          every paint record.
+          Paint codes, effects, sheens, source URLs, and derivation notes are shown
+          only when the workbook supports them. Unknown fields are omitted from
+          archive cards rather than filled with plausible but unsupported claims.
+          Formula 1 colors are screen references for the 2026 season; Heritage colors
+          remain a distinct historical series.
         </p>
       </section>
     </div>

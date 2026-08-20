@@ -4,12 +4,16 @@ import CorrectionDialog from "../components/CorrectionDialog";
 import PaintField from "../components/PaintField";
 import { paints } from "../data/paints";
 import { hexToHsb, hexToRgb } from "../lib/color";
+import { getPaintContextLabel, getPaintDisplayGroup } from "../lib/paint";
 import { findSimilarPaints } from "../lib/similarity";
 import {
   PAINT_COLLECTION_LABELS,
   PAINT_COLOR_FAMILY_LABELS,
   PAINT_CONFIDENCE_LABELS,
-  PAINT_FINISH_LABELS,
+  PAINT_EFFECT_LABELS,
+  PAINT_ROLE_LABELS,
+  PAINT_SERIES_LABELS,
+  PAINT_SHEEN_LABELS,
   PAINT_SOURCE_TYPE_LABELS,
   type PaintRecord,
 } from "../types";
@@ -25,12 +29,7 @@ interface PaintDetailProps {
   onToggleSaved: () => void;
 }
 
-interface DetailValueProps {
-  label: string;
-  value: string;
-}
-
-function DetailValue({ label, value }: DetailValueProps) {
+function DetailValue({ label, value }: { label: string; value: string }) {
   return (
     <div className="paint-detail-value">
       <span>{label}</span>
@@ -52,55 +51,55 @@ export default function PaintDetail({
   const rgb = hexToRgb(paint.hex);
   const hsb = hexToHsb(paint.hex);
   const relatedPaints = useMemo(
-    () =>
-      findSimilarPaints(paint.hex, paints, 6)
-        .filter((match) => match.paint.id !== paint.id)
-        .slice(0, 5),
+    () => findSimilarPaints(paint.hex, paints, 6).filter((match) => match.paint.id !== paint.id).slice(0, 5),
     [paint],
   );
 
-  if (!rgb || !hsb) {
-    return null;
-  }
+  if (!rgb || !hsb) return null;
 
   const rgbValue = `${rgb.r}, ${rgb.g}, ${rgb.b}`;
   const hsbValue = `${Math.round(hsb.h * 360)}°, ${Math.round(hsb.s * 100)}%, ${Math.round(hsb.b * 100)}%`;
   const normalizedValue = `${hsb.h.toFixed(3)}, ${hsb.s.toFixed(3)}, ${hsb.b.toFixed(3)}`;
+  const metadata: Array<[string, string]> = [
+    ["Collection", PAINT_COLLECTION_LABELS[paint.collection]],
+  ];
+
+  if (paint.collection === "oem") {
+    if (paint.manufacturer) metadata.push(["Manufacturer", paint.manufacturer]);
+    if (paint.paintCode) metadata.push(["Paint code", paint.paintCode]);
+  } else if (paint.collection === "motorsport") {
+    if (paint.series) metadata.push(["Series", PAINT_SERIES_LABELS[paint.series]]);
+    if (paint.season) metadata.push(["Season", String(paint.season)]);
+    if (paint.team) metadata.push(["Team", paint.team]);
+    if (paint.role) metadata.push(["Color role", PAINT_ROLE_LABELS[paint.role]]);
+  } else if (paint.manufacturer) {
+    metadata.push(["Reference group", paint.manufacturer]);
+  }
+
+  if (paint.effect) metadata.push(["Effect", PAINT_EFFECT_LABELS[paint.effect]]);
+  if (paint.sheen) metadata.push(["Sheen", PAINT_SHEEN_LABELS[paint.sheen]]);
+  metadata.push(
+    ["Color family", PAINT_COLOR_FAMILY_LABELS[paint.colorFamily]],
+    ["Provenance", PAINT_CONFIDENCE_LABELS[paint.confidence]],
+  );
 
   return (
     <div className="view paint-detail-view">
       <section className="paint-detail-intro reveal" aria-labelledby="paint-detail-title">
-        <button
-          type="button"
-          className="paint-detail-back"
-          onClick={onBack}
-        >
-          {backLabel}
-        </button>
+        <button type="button" className="paint-detail-back" onClick={onBack}>{backLabel}</button>
         <div className="paint-detail-intro__identity">
-          <span>
-            {paint.collection === "other"
-              ? "Other collection"
-              : `${PAINT_COLLECTION_LABELS[paint.collection]} · ${paint.brand}`}
-          </span>
+          <span>{getPaintContextLabel(paint)}</span>
           <h1 id="paint-detail-title">{paint.name}</h1>
-          <p>
-            A digital reference record with explicit provenance, technical values,
-            and perceptually related colors.
-          </p>
+          <p>A structured digital reference with explicit provenance, technical values, and perceptually related colors.</p>
         </div>
       </section>
 
       <section className="paint-detail-workbench" aria-label={`${paint.name} record`}>
         <div className="paint-detail-stage">
-          <PaintField
-            hex={paint.hex}
-            className="paint-detail-field"
-            label={`${paint.brand} ${paint.name} color field`}
-          >
+          <PaintField hex={paint.hex} className="paint-detail-field" label={`${getPaintDisplayGroup(paint)} ${paint.name} color field`}>
             <div className="paint-detail-field__topline">
               <div>
-                <span>{paint.brand}</span>
+                <span>{getPaintDisplayGroup(paint)}</span>
                 <strong>{paint.name}</strong>
               </div>
               <span>{PAINT_CONFIDENCE_LABELS[paint.confidence]}</span>
@@ -112,26 +111,9 @@ export default function PaintDetail({
           </PaintField>
 
           <div className="paint-detail-actions" aria-label="Paint actions">
-            <button
-              type="button"
-              className="button button--primary"
-              onClick={() => onOpenInLab(paint)}
-            >
-              Open in Lab
-            </button>
-            <button
-              type="button"
-              className="button button--secondary"
-              onClick={() => onComparePaint(paint)}
-            >
-              Send to Compare
-            </button>
-            <button
-              type="button"
-              className="button button--secondary"
-              onClick={onToggleSaved}
-              aria-pressed={isSaved}
-            >
+            <button type="button" className="button button--primary" onClick={() => onOpenInLab(paint)}>Open in Lab</button>
+            <button type="button" className="button button--secondary" onClick={() => onComparePaint(paint)}>Send to Compare</button>
+            <button type="button" className="button button--secondary" onClick={onToggleSaved} aria-pressed={isSaved}>
               {isSaved ? "Remove from My Colors" : "Save to My Colors"}
             </button>
           </div>
@@ -143,28 +125,19 @@ export default function PaintDetail({
             <p>Digital representations of the stored sRGB value.</p>
           </div>
           <div className="paint-detail-value-group">
-            <div className="paint-detail-value-group__heading">
-              <h3>RGB</h3>
-              <CopyButton value={rgbValue} label="Copy RGB" />
-            </div>
+            <div className="paint-detail-value-group__heading"><h3>RGB</h3><CopyButton value={rgbValue} label="Copy RGB" /></div>
             <DetailValue label="R" value={String(rgb.r)} />
             <DetailValue label="G" value={String(rgb.g)} />
             <DetailValue label="B" value={String(rgb.b)} />
           </div>
           <div className="paint-detail-value-group">
-            <div className="paint-detail-value-group__heading">
-              <h3>HSB / HSV</h3>
-              <CopyButton value={hsbValue} label="Copy HSB" />
-            </div>
+            <div className="paint-detail-value-group__heading"><h3>HSB / HSV</h3><CopyButton value={hsbValue} label="Copy HSB" /></div>
             <DetailValue label="Hue" value={`${Math.round(hsb.h * 360)}°`} />
             <DetailValue label="Saturation" value={`${Math.round(hsb.s * 100)}%`} />
             <DetailValue label="Brightness" value={`${Math.round(hsb.b * 100)}%`} />
           </div>
           <div className="paint-detail-value-group paint-detail-value-group--normalized">
-            <div className="paint-detail-value-group__heading">
-              <h3>Normalized HSB · 0–1</h3>
-              <CopyButton value={normalizedValue} label="Copy normalized" />
-            </div>
+            <div className="paint-detail-value-group__heading"><h3>Normalized HSB · 0–1</h3><CopyButton value={normalizedValue} label="Copy normalized" /></div>
             <DetailValue label="H" value={hsb.h.toFixed(3)} />
             <DetailValue label="S" value={hsb.s.toFixed(3)} />
             <DetailValue label="B" value={hsb.b.toFixed(3)} />
@@ -175,33 +148,10 @@ export default function PaintDetail({
       <section className="paint-detail-metadata" aria-labelledby="record-metadata-title">
         <div className="paint-detail-section-heading">
           <h2 id="record-metadata-title">Record metadata</h2>
-          <p>Only fields supported by the current record are asserted.</p>
+          <p>Fields follow the schema for this paint collection; unsupported values are not inferred.</p>
         </div>
         <dl className="paint-detail-specs">
-          <div>
-            <dt>Collection</dt>
-            <dd>{PAINT_COLLECTION_LABELS[paint.collection]}</dd>
-          </div>
-          <div>
-            <dt>Manufacturer / group</dt>
-            <dd>{paint.brand}</dd>
-          </div>
-          <div>
-            <dt>Paint code</dt>
-            <dd>{paint.paintCode ?? "Not recorded"}</dd>
-          </div>
-          <div>
-            <dt>Finish</dt>
-            <dd>{PAINT_FINISH_LABELS[paint.finish]}</dd>
-          </div>
-          <div>
-            <dt>Color family</dt>
-            <dd>{PAINT_COLOR_FAMILY_LABELS[paint.colorFamily]}</dd>
-          </div>
-          <div>
-            <dt>Provenance</dt>
-            <dd>{PAINT_CONFIDENCE_LABELS[paint.confidence]}</dd>
-          </div>
+          {metadata.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}
         </dl>
       </section>
 
@@ -212,28 +162,18 @@ export default function PaintDetail({
           <CorrectionDialog paint={paint} />
         </div>
         <dl>
-          <div>
-            <dt>Provenance</dt>
-            <dd>{PAINT_CONFIDENCE_LABELS[paint.confidence]}</dd>
-          </div>
+          <div><dt>Provenance</dt><dd>{PAINT_CONFIDENCE_LABELS[paint.confidence]}</dd></div>
           <div>
             <dt>Source</dt>
-            <dd>{paint.source}</dd>
-          </div>
-          <div>
-            <dt>Source type</dt>
-            <dd>{PAINT_SOURCE_TYPE_LABELS[paint.sourceType]}</dd>
-          </div>
-          <div>
-            <dt>Interpretation</dt>
             <dd>
-              This value is a screen reference, not a physical paint specification.
+              {paint.sourceUrl ? (
+                <a href={paint.sourceUrl} target="_blank" rel="noreferrer">{paint.sourceName ?? "Open source reference"}</a>
+              ) : (paint.sourceName ?? "Not recorded")}
             </dd>
           </div>
-          <div>
-            <dt>Original source note</dt>
-            <dd>{paint.note}</dd>
-          </div>
+          <div><dt>Source type</dt><dd>{PAINT_SOURCE_TYPE_LABELS[paint.sourceType]}</dd></div>
+          <div><dt>Interpretation</dt><dd>This value is a screen reference, not a physical paint specification.</dd></div>
+          {paint.derivationNote ? <div><dt>Derivation note</dt><dd>{paint.derivationNote}</dd></div> : null}
         </dl>
       </section>
 
@@ -245,33 +185,12 @@ export default function PaintDetail({
         <div className="paint-detail-related__list">
           {relatedPaints.map(({ paint: related, deltaE }) => (
             <article className="paint-detail-related__row" key={related.id}>
-              <button
-                type="button"
-                className="paint-detail-related__select"
-                onClick={() => onInspectPaint(related)}
-                aria-label={`View details for ${related.brand} ${related.name}`}
-              >
-                <PaintField
-                  hex={related.hex}
-                  className="paint-detail-related__swatch"
-                  label={`${related.name} color swatch`}
-                />
-                <span>
-                  <strong>{related.name}</strong>
-                  <small>{related.brand} · {related.hex}</small>
-                </span>
-                <span>
-                  <small>ΔE00</small>
-                  <strong>{deltaE.toFixed(2)}</strong>
-                </span>
+              <button type="button" className="paint-detail-related__select" onClick={() => onInspectPaint(related)} aria-label={`View details for ${getPaintDisplayGroup(related)} ${related.name}`}>
+                <PaintField hex={related.hex} className="paint-detail-related__swatch" label={`${related.name} color swatch`} />
+                <span><strong>{related.name}</strong><small>{getPaintDisplayGroup(related)} · {related.hex}</small></span>
+                <span><small>ΔE00</small><strong>{deltaE.toFixed(2)}</strong></span>
               </button>
-              <button
-                type="button"
-                className="button button--secondary"
-                onClick={() => onOpenInLab(related)}
-              >
-                Open in Lab
-              </button>
+              <button type="button" className="button button--secondary" onClick={() => onOpenInLab(related)}>Open in Lab</button>
             </article>
           ))}
         </div>

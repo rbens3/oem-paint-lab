@@ -2,17 +2,21 @@ import { hexToHsb } from "./color";
 import { hexToLab } from "./similarity";
 import {
   PAINT_COLLECTION_LABELS,
-  type PaintBrand,
+  PAINT_ROLE_LABELS,
+  PAINT_SERIES_LABELS,
   type PaintCollection,
   type PaintColorFamily,
   type PaintConfidence,
-  type PaintFinish,
+  type PaintEffect,
   type PaintRecord,
+  type PaintRole,
+  type PaintSeries,
+  type PaintSheen,
 } from "../types";
 
 export const LIBRARY_SORT_OPTIONS = [
   { value: "spectrum", label: "Color spectrum" },
-  { value: "manufacturer", label: "Manufacturer" },
+  { value: "manufacturer", label: "Manufacturer / group" },
   { value: "name", label: "Paint name A–Z" },
   { value: "light-dark", label: "Light → dark" },
   { value: "dark-light", label: "Dark → light" },
@@ -23,9 +27,13 @@ export type LibrarySort = (typeof LIBRARY_SORT_OPTIONS)[number]["value"];
 export interface LibraryState {
   query: string;
   collection: PaintCollection | "all";
-  brand: PaintBrand | "all";
+  manufacturer: string | "all";
+  series: PaintSeries | "all";
+  team: string | "all";
+  role: PaintRole | "all";
   colorFamily: PaintColorFamily | "all";
-  finish: PaintFinish | "all";
+  effect: PaintEffect | "all";
+  sheen: PaintSheen | "all";
   confidence: PaintConfidence | "all";
   sort: LibrarySort;
 }
@@ -33,9 +41,13 @@ export interface LibraryState {
 export const DEFAULT_LIBRARY_STATE: LibraryState = {
   query: "",
   collection: "all",
-  brand: "all",
+  manufacturer: "all",
+  series: "all",
+  team: "all",
+  role: "all",
   colorFamily: "all",
-  finish: "all",
+  effect: "all",
+  sheen: "all",
   confidence: "all",
   sort: "spectrum",
 };
@@ -80,8 +92,7 @@ const collator = new Intl.Collator("en", {
 interface PaintSortEntry<TPaint extends PaintRecord> {
   paint: TPaint;
   displayName: string;
-  displayManufacturer: string;
-  hue: number;
+  displayGroup: string;
   familyHue: number;
   hueBand: number;
   saturation: number;
@@ -89,24 +100,73 @@ interface PaintSortEntry<TPaint extends PaintRecord> {
   chroma: number;
 }
 
-/**
- * Removes a repeated manufacturer prefix for compact archive surfaces only.
- * Canonical record names remain unchanged for detail and data views.
- */
-export const getPaintDisplayName = (paint: PaintRecord): string => {
-  const manufacturerPrefix = `${paint.brand} `;
-
-  if (paint.collection === "oem" && paint.name.startsWith(manufacturerPrefix)) {
-    return paint.name.slice(manufacturerPrefix.length);
-  }
-
-  return paint.name;
+const hasRepeatedManufacturerPrefix = (paint: PaintRecord) => {
+  if (paint.collection !== "oem" || !paint.manufacturer) return false;
+  return paint.name.toLocaleLowerCase().startsWith(
+    `${paint.manufacturer.toLocaleLowerCase()} `,
+  );
 };
 
-export const getPaintDisplayManufacturer = (paint: PaintRecord): string =>
-  paint.collection === "oem"
-    ? paint.brand
-    : PAINT_COLLECTION_LABELS[paint.collection];
+/** Compact archive label; the canonical workbook name remains unchanged. */
+export const getPaintDisplayName = (paint: PaintRecord): string => {
+  const name = hasRepeatedManufacturerPrefix(paint)
+    ? paint.name.slice((paint.manufacturer?.length ?? 0) + 1)
+    : paint.name;
+
+  if (
+    paint.manufacturer === "Mercedes-Benz" &&
+    paint.name === "Brilliant Blue Metallic" &&
+    paint.paintCode
+  ) {
+    return `${name} · ${paint.paintCode}`;
+  }
+
+  return name;
+};
+
+export const getPaintDisplayGroup = (paint: PaintRecord): string => {
+  if (paint.collection === "oem") {
+    return paint.manufacturer ?? "OEM paint";
+  }
+  if (paint.collection === "motorsport") {
+    if (paint.series === "f1") {
+      return [paint.season, PAINT_SERIES_LABELS.f1, paint.team]
+        .filter(Boolean)
+        .join(" · ");
+    }
+    return paint.series
+      ? `${PAINT_COLLECTION_LABELS.motorsport} · ${PAINT_SERIES_LABELS[paint.series]}`
+      : PAINT_COLLECTION_LABELS.motorsport;
+  }
+  return paint.manufacturer
+    ? `${PAINT_COLLECTION_LABELS.other} · ${paint.manufacturer}`
+    : PAINT_COLLECTION_LABELS.other;
+};
+
+export const getPaintContextLabel = (paint: PaintRecord): string => {
+  const group = getPaintDisplayGroup(paint);
+  if (paint.role) return `${group} · ${PAINT_ROLE_LABELS[paint.role]}`;
+  return group;
+};
+
+export const getPaintSearchText = (paint: PaintRecord): string =>
+  [
+    paint.name,
+    paint.manufacturer,
+    paint.paintCode,
+    paint.hex,
+    paint.team,
+    paint.series ? PAINT_SERIES_LABELS[paint.series] : null,
+    paint.season,
+    paint.role,
+    paint.sourceName,
+    paint.sourceType,
+    paint.derivationNote,
+    ...paint.tags,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLocaleLowerCase();
 
 const getFamilyHue = (family: PaintRecord["colorFamily"], hue: number) => {
   const start = FAMILY_HUE_START[family] ?? 0;
@@ -124,8 +184,7 @@ const makeSortEntry = <TPaint extends PaintRecord>(
   return {
     paint,
     displayName: getPaintDisplayName(paint),
-    displayManufacturer: getPaintDisplayManufacturer(paint),
-    hue,
+    displayGroup: getPaintDisplayGroup(paint),
     familyHue,
     hueBand: Math.floor(familyHue / 10),
     saturation: hsb?.s ?? 0,
@@ -141,7 +200,7 @@ const compareStable = <TPaint extends PaintRecord>(
   b: PaintSortEntry<TPaint>,
 ) =>
   collator.compare(a.displayName, b.displayName) ||
-  collator.compare(a.paint.brand, b.paint.brand) ||
+  collator.compare(a.displayGroup, b.displayGroup) ||
   collator.compare(a.paint.name, b.paint.name) ||
   compareNumber(a.paint.id, b.paint.id);
 
@@ -151,10 +210,7 @@ const compareSpectrum = <TPaint extends PaintRecord>(
 ) => {
   const familyDifference =
     FAMILY_ORDER[a.paint.colorFamily] - FAMILY_ORDER[b.paint.colorFamily];
-
-  if (familyDifference) {
-    return familyDifference;
-  }
+  if (familyDifference) return familyDifference;
 
   if (NEUTRAL_FAMILIES.has(a.paint.colorFamily)) {
     return (
@@ -183,7 +239,7 @@ const compareSpectrum = <TPaint extends PaintRecord>(
   );
 };
 
-/** Returns a sorted copy and never mutates the source paint collection. */
+/** Returns a sorted copy and never mutates the source archive. */
 export const sortPaints = <TPaint extends PaintRecord>(
   paintRecords: readonly TPaint[],
   sort: LibrarySort,
@@ -193,20 +249,13 @@ export const sortPaints = <TPaint extends PaintRecord>(
   entries.sort((a, b) => {
     switch (sort) {
       case "manufacturer":
-        return (
-          collator.compare(a.displayManufacturer, b.displayManufacturer) ||
-          compareStable(a, b)
-        );
+        return collator.compare(a.displayGroup, b.displayGroup) || compareStable(a, b);
       case "name":
         return compareStable(a, b);
       case "light-dark":
-        return (
-          compareNumber(b.lightness, a.lightness) || compareStable(a, b)
-        );
+        return compareNumber(b.lightness, a.lightness) || compareStable(a, b);
       case "dark-light":
-        return (
-          compareNumber(a.lightness, b.lightness) || compareStable(a, b)
-        );
+        return compareNumber(a.lightness, b.lightness) || compareStable(a, b);
       case "spectrum":
       default:
         return compareSpectrum(a, b);

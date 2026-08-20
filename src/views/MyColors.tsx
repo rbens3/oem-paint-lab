@@ -1,8 +1,10 @@
 import CustomColorDialog from "../components/CustomColorDialog";
 import PaintField from "../components/PaintField";
+import { getPaintDisplayGroup } from "../lib/paint";
 import {
   PAINT_CONFIDENCE_LABELS,
-  PAINT_FINISH_LABELS,
+  PAINT_EFFECT_LABELS,
+  PAINT_SHEEN_LABELS,
   type CustomColor,
   type CustomColorInput,
   type HexColor,
@@ -78,7 +80,7 @@ export default function MyColors({
                 <a
                   className="my-color-card__link"
                   href={`#/paint/${paint.id}`}
-                  aria-label={`View ${paint.brand} ${paint.name} details`}
+                  aria-label={`View ${getPaintDisplayGroup(paint)} ${paint.name} details`}
                   onClick={(event) => {
                     event.preventDefault();
                     onInspectPaint(paint);
@@ -87,17 +89,22 @@ export default function MyColors({
                   <PaintField
                     hex={paint.hex}
                     className="my-color-card__field"
-                    label={`${paint.brand} ${paint.name} saved paint`}
+                    label={`${getPaintDisplayGroup(paint)} ${paint.name} saved paint`}
                   >
                     <div className="my-color-card__topline">
-                      <span>{paint.brand}</span>
+                      <span>{getPaintDisplayGroup(paint)}</span>
                       <span>{PAINT_CONFIDENCE_LABELS[paint.confidence]}</span>
                     </div>
                     <h3>{paint.name}</h3>
                     <div className="my-color-card__footer">
                       <strong>{paint.hex}</strong>
-                      {paint.finish !== "unknown" ? (
-                        <span>{PAINT_FINISH_LABELS[paint.finish]}</span>
+                      {paint.effect || paint.sheen ? (
+                        <span>
+                          {[
+                            paint.effect ? PAINT_EFFECT_LABELS[paint.effect] : null,
+                            paint.sheen ? PAINT_SHEEN_LABELS[paint.sheen] : null,
+                          ].filter(Boolean).join(" · ")}
+                        </span>
                       ) : null}
                     </div>
                   </PaintField>
