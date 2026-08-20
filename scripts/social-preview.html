@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1200, initial-scale=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&amp;family=Lexend:wght@400;500;600&amp;family=Unbounded:wght@800;900&amp;display=swap"
+      rel="stylesheet"
+    />
+    <title>OEM Paint Lab social preview source</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        width: 1200px;
+        height: 630px;
+        margin: 0;
+        overflow: hidden;
+        background: #f5f6f8;
+      }
+
+      body {
+        color: #101217;
+        font-family: "Lexend", Arial, sans-serif;
+      }
+
+      main {
+        position: relative;
+        width: 1200px;
+        height: 630px;
+        padding: 58px 64px 54px;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 420px;
+        gap: 56px;
+      }
+
+      main::before {
+        position: absolute;
+        inset: 24px;
+        border: 1px solid #d4d7dd;
+        content: "";
+        pointer-events: none;
+      }
+
+      .content {
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        font-size: 18px;
+        font-weight: 600;
+      }
+
+      .mark {
+        width: 32px;
+        height: 32px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2px;
+        padding: 3px;
+        border-radius: 3px;
+        background: #101217;
+      }
+
+      .mark span:nth-child(1) { background: #d40000; }
+      .mark span:nth-child(2) { background: #4b75a6; }
+      .mark span:nth-child(3) { background: #1c3d2c; }
+      .mark span:nth-child(4) { background: #c8ced4; }
+
+      h1 {
+        margin: 76px 0 0;
+        font-family: "Unbounded", "Arial Black", sans-serif;
+        font-size: 72px;
+        font-weight: 900;
+        letter-spacing: -0.055em;
+        line-height: 0.98;
+      }
+
+      .tagline {
+        margin: 24px 0 0;
+        color: #464a53;
+        font-size: 29px;
+        font-weight: 400;
+        letter-spacing: -0.025em;
+      }
+
+      .technical {
+        margin-top: auto;
+        padding-top: 20px;
+        border-top: 1px solid #bfc3cb;
+        color: #555a64;
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 15px;
+        font-weight: 500;
+        letter-spacing: 0.055em;
+        line-height: 1.65;
+        text-transform: uppercase;
+      }
+
+      .swatches {
+        height: 518px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 1fr 1fr 42px;
+        gap: 10px;
+        align-self: center;
+      }
+
+      .swatch {
+        position: relative;
+        border: 1px solid rgb(16 18 23 / 25%);
+      }
+
+      .swatch span {
+        position: absolute;
+        inset: auto 14px 13px;
+        color: inherit;
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+
+      .swatch--red { background: #d40000; color: #fff; }
+      .swatch--blue { background: #4b75a6; color: #fff; }
+      .swatch--green { background: #1c3d2c; color: #fff; }
+      .swatch--silver { background: #c8ced4; color: #101217; }
+      .swatch--yellow {
+        grid-column: 1 / -1;
+        background: #ffd200;
+        color: #101217;
+      }
+
+      .swatch--yellow span {
+        inset-block-end: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section class="content">
+        <div class="brand">
+          <span class="mark" aria-hidden="true">
+            <span></span><span></span><span></span><span></span>
+          </span>
+          <span>OEM Paint Lab</span>
+        </div>
+        <h1>OEM Paint<br />Lab</h1>
+        <p class="tagline">Automotive color, translated.</p>
+        <p class="technical">
+          303 OEM + Motorsport references<br />
+          CIEDE2000 · Normalized HSB · Provenance
+        </p>
+      </section>
+      <section class="swatches" aria-label="Automotive color swatches">
+        <div class="swatch swatch--red"><span>#D40000</span></div>
+        <div class="swatch swatch--blue"><span>#4B75A6</span></div>
+        <div class="swatch swatch--green"><span>#1C3D2C</span></div>
+        <div class="swatch swatch--silver"><span>#C8CED4</span></div>
+        <div class="swatch swatch--yellow"><span>#FFD200</span></div>
+      </section>
+    </main>
+  </body>
+</html>
