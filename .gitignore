@@ -1,4 +1,25 @@
+# Dependencies and build output
 node_modules
 dist
+
+# Local operating-system files
 .DS_Store
+
+# Existing local overrides
 *.local
+
+# Local environment files
+.env
+.env.*
+
+# Allow deliberately sanitized examples
+!.env.example
+!.env.*.example
+
+# Logs and test coverage
+*.log
+coverage/
+
+# Local editor folders
+.idea/
+.vscode/
