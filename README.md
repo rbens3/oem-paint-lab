@@ -90,6 +90,14 @@ The XLSX workbook is the canonical structured source for the archive. The import
 - There is no account system or cloud synchronization.
 - Source availability and external links may change over time.
 
+## Source use
+
+© 2026 Bennett Speir. All rights reserved in the original code and other original copyrightable material.
+
+This repository is publicly viewable for inspection and portfolio review. No general license is granted to reuse, modify, redistribute, or commercialize the original code without prior written permission.
+
+This notice does not limit rights granted under GitHub’s Terms of Service, applicable law, or third-party licenses. Third-party materials remain subject to their respective terms. No ownership of underlying factual color values is claimed.
+
 ## Third-party notices
 
 [THIRD\_PARTY\_NOTICES.md](./THIRD_PARTY_NOTICES.md) contains attribution and legal notices for adapted third-party structured data.
