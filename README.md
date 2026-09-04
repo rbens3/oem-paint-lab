@@ -4,7 +4,7 @@
 
 ![OEM Paint Lab — 303-record automotive color archive](./public/og-image.png)
 
-**Live product:** [https://oem-paint-lab.vercel.app/](https://oem-paint-lab.vercel.app/)
+**Live product:** [https://paintlab.bennettspeir.com/](https://paintlab.bennettspeir.com/)
 
 ## What it is
 
